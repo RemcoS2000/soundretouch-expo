@@ -1,14 +1,12 @@
 {
 	"name": "SoundRetouched Dev",
-	"dockerFile": "Dockerfile",
-	"context": "..",
-	"remoteUser": "node",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:20",
 	"postCreateCommand": "npm install",
+	"mounts": ["source=node_modules_${devcontainerId},target=${containerWorkspaceFolder}/node_modules,type=volume"],
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"terminal.integrated.defaultProfile.linux": "zsh",
-				"editor.formatOnSave": true
+				"terminal.integrated.defaultProfile.linux": "zsh"
 			},
 			"extensions": [
 				"dbaeumer.vscode-eslint",
@@ -26,5 +24,13 @@
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "20"
 		}
-	}
+	},
+	"forwardPorts": [8081, 19000, 19001, 19002],
+	"portsAttributes": {
+		"8081": { "label": "Expo Metro" },
+		"19000": { "label": "Expo Dev Server" },
+		"19001": { "label": "Expo WebSocket" },
+		"19002": { "label": "Expo DevTools" }
+	},
+	"runArgs": ["-p=8081:8081", "-p=19000:19000", "-p=19001:19001", "-p=19002:19002", "--env-file", ".env"]
 }
