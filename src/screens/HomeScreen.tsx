@@ -9,7 +9,7 @@ import { EmptyDeviceList } from '../components/EmptyDeviceList';
 import { Header } from '../components/Header';
 
 export default function HomeScreen() {
-	const { devices, setDevices, loading, refresh } = useSoundTouchDiscovery();
+	const { devices, loading, refresh, setDevices } = useSoundTouchDiscovery();
 	useSoundTouchPolling(devices, setDevices);
 
 	const handleDevicePress = useCallback((item: SoundTouchDevice) => {

@@ -3,6 +3,9 @@ import type { SoundTouchDevice } from '../services/discovery';
 import { discoverAllSoundtouchDevices } from '../services/discovery';
 import { log } from '../utils/logger';
 
+/**
+ * Hook to poll all SoundTouch devices on the local network.
+ */
 export function useSoundTouchDiscovery() {
 	const [devices, setDevices] = useState<SoundTouchDevice[]>([]);
 	const [loading, setLoading] = useState(false);
