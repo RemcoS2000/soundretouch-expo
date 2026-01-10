@@ -15,7 +15,9 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
+		"@expo/vector-icons": "^15.0.3",
 		"expo": "^54.0.27",
+		"expo-network": "~8.0.8",
 		"expo-router": "^6.0.17",
 		"expo-status-bar": "~3.0.9",
 		"fast-xml-parser": "^5.3.2",

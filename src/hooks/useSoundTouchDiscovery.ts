@@ -1,37 +1,42 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SoundTouchDevice } from '../services/discovery';
-import { discoverSoundtouchDevices } from '../services/discovery';
+import { discoverAllSoundtouchDevices } from '../services/discovery';
+import { log } from '../utils/logger';
 
-export function useSoundTouchDiscovery(pollInterval = 0) {
+export function useSoundTouchDiscovery() {
 	const [devices, setDevices] = useState<SoundTouchDevice[]>([]);
 	const [loading, setLoading] = useState(false);
-	const mounted = useRef(true);
-	const intervalRef = useRef<number | null>(null);
+	const isScanning = useRef(false);
 
-	async function scan() {
+	const scanFull = useCallback(async () => {
+		if (isScanning.current) return;
+		isScanning.current = true;
+
 		setLoading(true);
+		log.info('Starting full SoundTouch discovery...');
+
+		const foundDevices: SoundTouchDevice[] = [];
+
 		try {
-			const found = await discoverSoundtouchDevices();
-			if (!mounted.current) return;
-			found.sort((a, b) => a.name.localeCompare(b.name));
-			setDevices(found);
+			await discoverAllSoundtouchDevices((device) => {
+				log.debug('Device discovered (full scan):', device);
+				foundDevices.push(device);
+			});
+
+			foundDevices.sort((a, b) => a.name.localeCompare(b.name));
+			setDevices(foundDevices);
+			log.info(`Full discovery complete: ${foundDevices.length} device(s) found`);
+		} catch (error) {
+			log.error('An error occurred during device discovery:', error);
 		} finally {
-			if (mounted.current) setLoading(false);
+			setLoading(false);
+			isScanning.current = false;
 		}
-	}
+	}, []);
 
 	useEffect(() => {
-		mounted.current = true;
-		scan();
+		scanFull();
+	}, [scanFull]);
 
-		if (pollInterval > 0) {
-			intervalRef.current = window.setInterval(scan, pollInterval);
-		}
-		return () => {
-			mounted.current = false;
-			if (intervalRef.current) clearInterval(intervalRef.current);
-		};
-	}, [pollInterval]);
-
-	return { devices, loading, refresh: scan };
+	return { devices, loading, refresh: scanFull, setDevices };
 }

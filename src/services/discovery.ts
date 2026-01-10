@@ -1,7 +1,15 @@
 import { Platform } from 'react-native';
-import Zeroconf from 'react-native-zeroconf';
 import { XMLParser } from 'fast-xml-parser';
 
+import { getLocalSubnet } from '../utils';
+import { log } from '../utils/logger';
+
+const INFO_PORT = 8090;
+const TIMEOUT_MS = 10000;
+
+/**
+ * SoundTouch device representation
+ */
 export type SoundTouchDevice = {
 	id: string;
 	name: string;
@@ -9,70 +17,103 @@ export type SoundTouchDevice = {
 	port: number;
 	model?: string;
 	raw?: Record<string, unknown>;
+	disconnected?: boolean;
 };
 
-function parseDescriptorXml(xmlText: string): {
-	friendlyName?: string;
-	modelName?: string;
-	raw: Record<string, unknown> | null;
-} {
+/**
+ * Parse /info XML response from SoundTouch device
+ */
+export function parseDescriptorXml(xmlText: string) {
 	try {
 		const parser = new XMLParser({ ignoreAttributes: false });
 		const obj = parser.parse(xmlText);
-		const device = obj.root?.device ?? obj.device ?? obj;
+
+		const info = obj.info ?? obj.root?.info ?? obj.device; // fallback
+
 		return {
-			friendlyName: device?.friendlyName,
-			modelName: device?.modelName,
+			friendlyName: info?.name,
+			modelName: info?.type || info?.modelName,
 			raw: obj,
 		};
-	} catch {
+	} catch (err) {
+		log.error('XML parse error:', err);
 		return { raw: null };
 	}
 }
 
-export function discoverSoundtouchDevices(): Promise<SoundTouchDevice[]> {
+/**
+ * Fetches information from a single SoundTouch device.
+ * @param ip The IP address of the device to fetch.
+ * @param onDeviceFound Callback function invoked when the device is found.
+ * @param port The port to use for the connection.
+ * @param timeoutMs The timeout for the fetch request.
+ */
+async function fetchDevice(ip: string, onDeviceFound: (device: SoundTouchDevice) => void) {
+	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+		const res = await fetch(`http://${ip}:${INFO_PORT}/info`, { signal: controller.signal });
+		clearTimeout(timeout);
+
+		if (!res.ok) return;
+
+		const text = await res.text();
+		const parsed = parseDescriptorXml(text);
+
+		const device: SoundTouchDevice = {
+			id: ip,
+			name: parsed.friendlyName || `SoundTouch ${ip}`,
+			ip,
+			port: INFO_PORT,
+			model: parsed.modelName,
+			raw: parsed.raw ?? undefined,
+		};
+
+		onDeviceFound(device);
+	} catch {
+		// Ignore unreachable IPs or timeouts
+	}
+}
+
+/**
+ * Scans the entire local network for SoundTouch devices.
+ *
+ * @param onDeviceFound Callback function that is invoked for each discovered device.
+ * @param options Configuration options for the discovery process.
+ */
+export async function discoverAllSoundtouchDevices(onDeviceFound: (device: SoundTouchDevice) => void): Promise<void> {
 	if (Platform.OS === 'web') {
-		console.log('Web environment detected, skipping device scan.');
-		return Promise.resolve([]);
+		log.info('Skipping discovery on web.');
+		return;
 	}
 
-	return new Promise((resolve) => {
-		const zeroconf = new Zeroconf();
-		const devices: { [id: string]: SoundTouchDevice } = {};
+	const subnet = await getLocalSubnet();
+	log.info(`Starting SoundTouch discovery on ${subnet}.0/24...`);
 
-		zeroconf.on('resolved', async (service) => {
-			if (service.name.toLowerCase().includes('soundtouch') && !devices[service.host]) {
-				const device: SoundTouchDevice = {
-					id: service.host,
-					name: service.name,
-					ip: service.addresses[0],
-					port: service.port,
-				};
+	const promises: Promise<void>[] = [];
+	for (let i = 1; i <= 254; i++) {
+		const ip = `${subnet}.${i}`;
+		promises.push(fetchDevice(ip, onDeviceFound));
+	}
+	await Promise.all(promises);
+}
 
-				// Fetch descriptor for more details
-				try {
-					const res = await fetch(`http://${device.ip}:${device.port}/info`);
-					if (res.ok) {
-						const text = await res.text();
-						const parsed = parseDescriptorXml(text);
-						device.name = parsed.friendlyName || device.name;
-						device.model = parsed.modelName;
-						if (parsed.raw) {
-							device.raw = parsed.raw;
-						}
-					}
-				} catch (error) {
-					console.error('Error fetching device descriptor:', error);
-				}
-				devices[service.host] = device;
-			}
-		});
+/**
+ * Checks a list of known SoundTouch devices to see if they are still reachable.
+ *
+ * @param devices An array of SoundTouchDevice objects to check.
+ * @param onDeviceFound Callback function that is invoked for each reachable device.
+ * @param options Configuration options for the discovery process.
+ */
+export async function checkKnownSoundtouchDevices(
+	devices: SoundTouchDevice[],
+	onDeviceFound: (device: SoundTouchDevice) => void
+): Promise<void> {
+	if (Platform.OS === 'web' || devices.length === 0) {
+		return;
+	}
 
-		zeroconf.scan('soundtouch', 'tcp', 'local.');
-
-		setTimeout(() => {
-			zeroconf.stop();
-			resolve(Object.values(devices));
-		}, 5000); // Scan for 5 seconds
-	});
+	const promises = devices.map((device) => fetchDevice(device.ip, onDeviceFound));
+	await Promise.all(promises);
 }
