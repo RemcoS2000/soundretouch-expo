@@ -25,8 +25,12 @@
 			"version": "20"
 		}
 	},
-	"containerEnv": {
-		"REACT_NATIVE_PACKAGER_HOSTNAME": "${localEnv:REACT_NATIVE_PACKAGER_HOSTNAME}"
-	},
-	"runArgs": ["--network=host", "--env-file", ".devcontainer/host.env", "--env-file", ".env"]
+	"runArgs": ["-p=8081:8081", "-p=19000:19000", "-p=19001:19001", "-p=19002:19002", "--env-file", ".env"],
+	"forwardPorts": [8081, 19000, 19001, 19002],
+	"portsAttributes": {
+		"8081": { "label": "Expo Metro" },
+		"19000": { "label": "Expo Dev Server" },
+		"19001": { "label": "Expo WebSocket" },
+		"19002": { "label": "Expo DevTools" }
+	}
 }
