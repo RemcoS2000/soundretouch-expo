@@ -10,13 +10,13 @@
 			},
 			"extensions": [
 				"dbaeumer.vscode-eslint",
-				"esbenp.prettier-vscode",
 				"ms-vscode.vscode-typescript-next",
 				"ReactNativeTools.vscode-react-native",
 				"ms-azuretools.vscode-docker",
 				"ms-vscode.remote-explorer",
 				"github.vscode-github-actions",
-				"prettier.prettier-vscode"
+				"prettier.prettier-vscode",
+				"openai.chatgpt"
 			]
 		}
 	},
@@ -25,12 +25,8 @@
 			"version": "20"
 		}
 	},
-	"forwardPorts": [8081, 19000, 19001, 19002],
-	"portsAttributes": {
-		"8081": { "label": "Expo Metro" },
-		"19000": { "label": "Expo Dev Server" },
-		"19001": { "label": "Expo WebSocket" },
-		"19002": { "label": "Expo DevTools" }
+	"containerEnv": {
+		"REACT_NATIVE_PACKAGER_HOSTNAME": "${localEnv:REACT_NATIVE_PACKAGER_HOSTNAME}"
 	},
-	"runArgs": ["-p=8081:8081", "-p=19000:19000", "-p=19001:19001", "-p=19002:19002", "--env-file", ".env"]
+	"runArgs": ["--network=host", "--env-file", ".devcontainer/host.env", "--env-file", ".env"]
 }

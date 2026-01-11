@@ -9,6 +9,7 @@
 		"android": "expo start --android",
 		"ios": "expo start --ios",
 		"web": "expo start --web",
+		"proxy": "node proxy/server.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
 		"format": "prettier --write .",

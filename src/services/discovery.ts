@@ -1,8 +1,5 @@
-import { Platform } from 'react-native';
 import { XMLParser } from 'fast-xml-parser';
-
-import { getLocalSubnet } from '../utils';
-import { log } from '../utils/logger';
+import { log, getLocalSubnet, fetch } from '../utils';
 
 const INFO_PORT = 8090;
 const TIMEOUT_MS = 10000;
@@ -83,11 +80,6 @@ async function fetchDevice(ip: string, onDeviceFound: (device: SoundTouchDevice)
  * @param options Configuration options for the discovery process.
  */
 export async function discoverAllSoundtouchDevices(onDeviceFound: (device: SoundTouchDevice) => void): Promise<void> {
-	if (Platform.OS === 'web') {
-		log.info('Skipping discovery on web.');
-		return;
-	}
-
 	const subnet = await getLocalSubnet();
 	log.info(`Starting SoundTouch discovery on ${subnet}.0/24...`);
 
@@ -110,7 +102,7 @@ export async function checkKnownSoundtouchDevices(
 	devices: SoundTouchDevice[],
 	onDeviceFound: (device: SoundTouchDevice) => void
 ): Promise<void> {
-	if (Platform.OS === 'web' || devices.length === 0) {
+	if (devices.length === 0) {
 		return;
 	}
 

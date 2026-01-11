@@ -11,7 +11,7 @@ interface HeaderProps {
 export function Header({ loading, onRefresh }: HeaderProps) {
 	return (
 		<View style={styles.header}>
-			<Text style={styles.title}>SoundRetouched</Text>
+			<Text style={styles.title}>SoundReTouch</Text>
 			{loading ? (
 				<ActivityIndicator />
 			) : (
