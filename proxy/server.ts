@@ -4,18 +4,15 @@ import express from 'express';
 /**
  * Dev-only proxy server for Expo Web.
  *
- * Provides a generic /proxy endpoint to forward requests and a /soundtouch/discover
- * endpoint to scan a subnet server-side when browser limits would otherwise block discovery.
+ * Provides a generic /proxy endpoint to forward requests.
  */
 const DEV_PROXY_PORT = Number(process.env.DEV_PROXY_PORT || 4100);
 const DEV_PROXY_DISCOVERY_TIMEOUT_MS = Number(process.env.DEV_PROXY_DISCOVERY_TIMEOUT_MS) || 10000;
-const DEV_PROXY_DISCOVERY_PORT = Number(process.env.DEV_PROXY_DISCOVERY_PORT) || 8090;
 
 // Print configuration
 console.log(`⚙️ Proxy configuration:
 	DEV_PROXY_PORT: ${DEV_PROXY_PORT}
 	DEV_PROXY_DISCOVERY_TIMEOUT_MS: ${DEV_PROXY_DISCOVERY_TIMEOUT_MS}
-	DEV_PROXY_DISCOVERY_PORT: ${DEV_PROXY_DISCOVERY_PORT}
 `);
 
 const app = express();
@@ -99,56 +96,6 @@ app.all('/proxy', async (req, res) => {
 			.type('text')
 			.send(err instanceof Error ? err.message : 'Proxy error');
 	}
-});
-
-/**
- * /soundtouch/discover scans a subnet server-side and returns devices that respond to /info.
- */
-app.get('/soundtouch/discover', async (req, res) => {
-	const subnet = typeof req.query.subnet === 'string' ? req.query.subnet : undefined;
-	const port = Number(typeof req.query.port === 'string' ? req.query.port : DEV_PROXY_DISCOVERY_PORT);
-	const rangeStart = Number(typeof req.query.rangeStart === 'string' ? req.query.rangeStart : '');
-	const rangeEnd = Number(typeof req.query.rangeEnd === 'string' ? req.query.rangeEnd : '');
-
-	if (!subnet) {
-		res.status(400).type('text').send('Missing subnet parameter');
-		return;
-	}
-
-	if (!Number.isFinite(rangeStart) || !Number.isFinite(rangeEnd)) {
-		res.status(400).type('text').send('Missing rangeStart or rangeEnd parameter');
-		return;
-	}
-
-	console.log(`🔍 Discovery request: subnet=${subnet} port=${port} range=${rangeStart}-${rangeEnd}`);
-
-	const ips: string[] = [];
-	for (let i = rangeStart; i <= rangeEnd; i += 1) {
-		ips.push(`${subnet}.${i}`);
-	}
-
-	const results: { ip: string; infoXml: string }[] = [];
-
-	await Promise.all(
-		ips.map(async (ip) => {
-			try {
-				const controller = new AbortController();
-				const timeout = setTimeout(() => controller.abort(), DEV_PROXY_DISCOVERY_TIMEOUT_MS);
-				const response = await fetch(`http://${ip}:${port}/info`, { signal: controller.signal });
-				clearTimeout(timeout);
-
-				if (!response.ok) return;
-				const text = await response.text();
-				results.push({ ip, infoXml: text });
-			} catch {
-				// Ignore unreachable IPs or timeouts
-			}
-		})
-	);
-
-	console.log(`✅ Discovery complete: ${results.length} device(s) found`);
-
-	res.status(200).json({ subnet, port, devices: results });
 });
 
 app.listen(DEV_PROXY_PORT, () => {
