@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, TouchableOpacity, FlatList, ListRenderItem, Dim
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSoundTouchDevices } from '../state/SoundTouchDevicesContext';
-import { NowPlayingCard } from '../components/NowPlayingCard';
+import { NowPlayingCard } from '../components/now-playing/NowPlayingCard';
 
 export default function HomeScreen() {
 	const router = useRouter();
@@ -115,9 +115,7 @@ const styles = StyleSheet.create({
 		padding: 18,
 		borderRadius: 18,
 		backgroundColor: '#fff',
-		shadowColor: '#000',
-		shadowOpacity: 0.06,
-		shadowRadius: 8,
+		boxShadow: '0px 8px 16px rgba(0,0,0,0.08)',
 	},
 	emptyTitle: {
 		fontSize: 16,
