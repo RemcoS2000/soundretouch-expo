@@ -1,27 +1,41 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, FlatList, ListRenderItem, Dimensions } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, FlatList, ListRenderItem, useWindowDimensions, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSoundTouchDevices } from '../state/SoundTouchDevicesContext';
+import { useColorTint } from '../hooks/useColorTint';
 import { NowPlayingCard } from '../components/now-playing/NowPlayingCard';
+import { ZoneControlCard } from '../components/now-playing/ZoneControlCard';
 
 export default function HomeScreen() {
 	const router = useRouter();
 	const { devices } = useSoundTouchDevices();
-	const deviceCountLabel = useMemo(() => (devices.length === 1 ? '1 device added' : `${devices.length} devices added`), [devices.length]);
-	const windowWidth = useMemo(() => Dimensions.get('window').width, []);
-	const cardWidth = useMemo(() => windowWidth, [windowWidth]);
+	const [activeIndex, setActiveIndex] = useState(0);
+	const activeDevice = devices[activeIndex]?.device ?? null;
+	const { lightTint } = useColorTint(activeDevice);
+	const backgroundTint = lightTint ?? '#f3f4f6';
+	const { width: cardWidth } = useWindowDimensions();
 
 	const renderItem: ListRenderItem<(typeof devices)[number]> = ({ item }) => (
 		<View style={{ width: cardWidth }}>
-			<View style={styles.carouselItem}>
+			<ScrollView contentContainerStyle={styles.carouselItem} showsVerticalScrollIndicator={false}>
 				<NowPlayingCard device={item.device} />
-			</View>
+				<ZoneControlCard device={item.device} />
+			</ScrollView>
 		</View>
 	);
 
+	const handleScroll = useCallback(
+		(event: { nativeEvent: { contentOffset: { x: number } } }) => {
+			const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardWidth);
+			setActiveIndex((prev) => (prev === nextIndex ? prev : Math.max(0, Math.min(devices.length - 1, nextIndex))));
+		},
+		[cardWidth, devices.length]
+	);
+
 	return (
-		<View style={styles.container}>
+		<LinearGradient colors={['#fff', backgroundTint]} style={styles.container}>
 			<View style={styles.header}>
 				<Text style={styles.title}>SoundReTouch</Text>
 				<TouchableOpacity
@@ -44,6 +58,8 @@ export default function HomeScreen() {
 						showsHorizontalScrollIndicator={false}
 						keyExtractor={(item) => item.device.host}
 						renderItem={renderItem}
+						onScroll={handleScroll}
+						scrollEventThrottle={16}
 						snapToInterval={cardWidth}
 						decelerationRate="fast"
 						contentContainerStyle={styles.carouselContainer}
@@ -55,8 +71,7 @@ export default function HomeScreen() {
 					</View>
 				)}
 			</View>
-			<Text style={styles.placeholderMeta}>{deviceCountLabel}</Text>
-		</View>
+		</LinearGradient>
 	);
 }
 
@@ -65,7 +80,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingTop: 60,
 		paddingBottom: 20,
-		backgroundColor: '#f3f4f6',
 	},
 	header: {
 		flexDirection: 'row',
@@ -90,13 +104,6 @@ const styles = StyleSheet.create({
 		bottom: -2,
 		backgroundColor: '#fff',
 		borderRadius: 8,
-	},
-	sectionLabel: {
-		marginTop: 12,
-		marginBottom: 10,
-		color: '#111',
-		fontSize: 16,
-		fontWeight: '700',
 	},
 	carouselWrap: {
 		flex: 1,
@@ -125,11 +132,5 @@ const styles = StyleSheet.create({
 	emptySubtitle: {
 		marginTop: 6,
 		color: '#666',
-	},
-	placeholderMeta: {
-		marginTop: 8,
-		paddingHorizontal: 20,
-		color: '#999',
-		fontSize: 12,
 	},
 });
