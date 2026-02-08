@@ -2,8 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext';
-import { useColorTint } from '../../hooks/useColorTint';
+import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext';
 
 type ZoneControlCardProps = {
 	device: SoundTouchDevice;
@@ -11,7 +10,6 @@ type ZoneControlCardProps = {
 
 export function ZoneControlCard({ device }: ZoneControlCardProps) {
 	const { devices } = useSoundTouchDevices();
-	const { darkTint } = useColorTint(device);
 	const availableDevices = useMemo(
 		() =>
 			devices
@@ -43,7 +41,7 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 								<Text style={styles.listName}>{item.name}</Text>
 							</View>
 							<TouchableOpacity
-								style={[styles.addButton, { backgroundColor: darkTint }]}
+								style={styles.addButton}
 								accessibilityLabel={`Add ${item.name} to zone`}
 								onPress={() => {
 									// TODO: Call zone add endpoint for item.host

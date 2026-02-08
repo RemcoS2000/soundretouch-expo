@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import type { DeviceInfo, NowPlaying, SoundTouchDevice } from '@soundretouch/api/device';
 
 const PROGRESS_TICK_MS = 100;
 const PROGRESS_STEP_SECONDS = 0.1;
 
-export const useNowPlayingDevice = (device: SoundTouchDevice | null) => {
+export const useNowPlaying = (device: SoundTouchDevice | null) => {
 	const [info, setInfo] = useState<DeviceInfo | null>(null);
 	const [nowPlaying, setNowPlaying] = useState<NowPlaying | null>(null);
 	const [displayTime, setDisplayTime] = useState<number | null>(null);
 	const effectiveNowPlaying = device ? nowPlaying : null;
 	const effectiveInfo = device ? info : null;
 	const effectiveDisplayTime = device ? displayTime : null;
-	const artUrl = effectiveNowPlaying?.art?.['#text'] || effectiveNowPlaying?.ContentItem?.containerArt;
+	const artUrl = effectiveNowPlaying?.art?.['#text'];
 
 	/**
 	 * Syncs now playing data and resets the display time ticker to the device time.
@@ -28,11 +29,16 @@ export const useNowPlayingDevice = (device: SoundTouchDevice | null) => {
 	useEffect(() => {
 		if (!device) return;
 		let cancelled = false;
-		const unsubscribe = device.onNowPlayingUpdated((data) => {
-			if (!cancelled) setPlaying(data);
-		});
+		let unsubscribeNowPlaying = () => {};
 
-		(async () => {
+		const subscribeNowPlaying = () => {
+			unsubscribeNowPlaying();
+			unsubscribeNowPlaying = device.onNowPlayingUpdated((data) => {
+				if (!cancelled) setPlaying(data);
+			});
+		};
+
+		const refreshFromDevice = async () => {
 			try {
 				const [deviceInfo, playing] = await Promise.all([device.info(), device.nowPlaying()]);
 				if (cancelled) return;
@@ -43,11 +49,23 @@ export const useNowPlayingDevice = (device: SoundTouchDevice | null) => {
 				setInfo(null);
 				setPlaying(null);
 			}
-		})();
+		};
+
+		subscribeNowPlaying();
+		void refreshFromDevice();
+
+		const appStateSubscription = AppState.addEventListener('change', (state) => {
+			if (state === 'active') {
+				// Re-subscribe and refresh when returning from background.
+				subscribeNowPlaying();
+				void refreshFromDevice();
+			}
+		});
 
 		return () => {
 			cancelled = true;
-			unsubscribe();
+			appStateSubscription.remove();
+			unsubscribeNowPlaying();
 		};
 	}, [device, setPlaying]);
 

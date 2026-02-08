@@ -1,30 +1,32 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, type DimensionValue } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, type DimensionValue, type ViewStyle } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useNowPlayingDevice } from '../../hooks/useNowPlayingDevice';
-import { useColorTint } from '../../hooks/useColorTint';
+import { useNowPlaying } from '../../../hooks/useNowPlaying';
 
 type NowPlayingCardProps = {
 	device: SoundTouchDevice;
 };
 
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
-	const { info, nowPlaying, displayTime, artUrl } = useNowPlayingDevice(device);
-	const { darkTint } = useColorTint(device);
+	// Live device state: metadata, playback state, and artwork URL.
+	const { nowPlaying, displayTime, artUrl } = useNowPlaying(device);
 
-	const deviceName = info?.name ?? 'SoundTouch device';
-	const deviceModel = info?.type ?? 'Unknown model';
+	// Fallback-safe labels when upstream payload misses fields.
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || 'Unknown track';
 	const artist = nowPlaying?.artist || 'Unknown artist';
 	const album = nowPlaying?.album;
 
+	// Use smoothed ticker time when available, otherwise raw device time.
 	const displaySeconds = displayTime ?? nowPlaying?.time?.['#text'] ?? 0;
 	const totalTime = nowPlaying?.time?.total ?? 0;
 	const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0;
 	const progressWidth = useMemo(() => `${(progress * 100).toFixed(2)}%` as DimensionValue, [progress]);
 	const isPlaying = nowPlaying?.playStatus === 'PLAY_STATE';
+	const containerStyle = useMemo<ViewStyle[]>(() => [styles.card, styles.cardFull], []);
+	const nowPlayingCardStyle = useMemo<ViewStyle[]>(() => [styles.nowPlayingCard, styles.nowPlayingCardFull], []);
 
+	// Transport key actions are delegated to the SoundTouch device API.
 	const handlePlayPause = useCallback(async () => {
 		try {
 			await device.keyPressAndRelease('PLAY_PAUSE');
@@ -49,42 +51,25 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 		}
 	}, [device]);
 
-	const handlePower = useCallback(async () => {
-		try {
-			await device.keyPressAndRelease('POWER');
-		} catch {
-			// Ignore control failures for now.
-		}
-	}, [device]);
-
 	return (
-		<View style={styles.card}>
-			<View style={styles.deviceHeader}>
-				<MaterialIcons name="speaker" size={22} color="#111" style={styles.deviceIcon} />
-				<View>
-					<Text style={styles.title}>{deviceName}</Text>
-					<Text style={styles.subtitle}>{deviceModel}</Text>
-				</View>
-				<TouchableOpacity
-					style={[styles.powerButton, { backgroundColor: darkTint }]}
-					accessibilityLabel="Power"
-					onPress={handlePower}
-				>
-					<MaterialIcons name="power-settings-new" size={16} color="#fff" />
-				</TouchableOpacity>
-			</View>
-			<View style={styles.nowPlayingCard}>
+		<View style={containerStyle}>
+			<View style={nowPlayingCardStyle}>
+				{/* Header is hidden in standby mode to keep the state-focused empty view clean. */}
 				{nowPlaying?.source !== 'STANDBY' && (
 					<View style={styles.nowPlayingHeader}>
 						<Text style={styles.nowPlayingTitle}>Now playing</Text>
 						{nowPlaying?.source && (
-							<View style={[styles.sourcePill, { backgroundColor: darkTint }]}>
+							<View style={styles.sourcePill}>
 								<Text style={styles.sourceText}>{nowPlaying.source}</Text>
 							</View>
 						)}
 					</View>
 				)}
+
+				{/* Cover art stays visible for active sources and drives the visual focus. */}
 				{artUrl && <Image source={{ uri: artUrl }} style={styles.artwork} />}
+
+				{/* Standby has a dedicated stencil-style view. */}
 				{nowPlaying?.source === 'STANDBY' ? (
 					<View style={styles.standbyCard}>
 						<View style={styles.standbyIcon}>
@@ -94,40 +79,30 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 						<Text style={styles.standbySubtitle}>Sleeping speaker · zzz</Text>
 					</View>
 				) : nowPlaying ? (
-					<>
+					// Active playback view: metadata + progress + transport controls.
+					<View style={[styles.playbackMeta, styles.playbackMetaBottom]}>
 						<Text style={styles.trackTitle}>{title}</Text>
 						<Text style={styles.trackMeta}>
 							{artist}
 							{album ? ` • ${album}` : ''}
 						</Text>
 						<View style={styles.progressBar}>
-							<View style={[styles.progressFill, { width: progressWidth, backgroundColor: darkTint }]} />
+							<View style={[styles.progressFill, { width: progressWidth }]} />
 						</View>
 						<View style={styles.controls}>
-							<TouchableOpacity
-								style={[styles.controlButton, { backgroundColor: darkTint }]}
-								accessibilityLabel="Previous"
-								onPress={handlePrevious}
-							>
-								<MaterialIcons name="skip-previous" size={24} color="#fff" />
+							<TouchableOpacity style={styles.controlButton} accessibilityLabel="Previous" onPress={handlePrevious}>
+								<MaterialIcons name="skip-previous" size={24} color="#111" />
 							</TouchableOpacity>
-							<TouchableOpacity
-								style={[styles.controlButton, { backgroundColor: darkTint }]}
-								accessibilityLabel="Play or pause"
-								onPress={handlePlayPause}
-							>
-								<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#fff" />
+							<TouchableOpacity style={styles.controlButton} accessibilityLabel="Play or pause" onPress={handlePlayPause}>
+								<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#111" />
 							</TouchableOpacity>
-							<TouchableOpacity
-								style={[styles.controlButton, { backgroundColor: darkTint }]}
-								accessibilityLabel="Next"
-								onPress={handleNext}
-							>
-								<MaterialIcons name="skip-next" size={24} color="#fff" />
+							<TouchableOpacity style={styles.controlButton} accessibilityLabel="Next" onPress={handleNext}>
+								<MaterialIcons name="skip-next" size={24} color="#111" />
 							</TouchableOpacity>
 						</View>
-					</>
+					</View>
 				) : (
+					// Fallback when no state has been retrieved yet.
 					<Text style={styles.nowPlayingSubtitle}>No track information yet.</Text>
 				)}
 			</View>
@@ -136,46 +111,29 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 }
 
 const styles = StyleSheet.create({
-	card: {
-		padding: 18,
-		borderRadius: 18,
-		backgroundColor: '#fff',
-		boxShadow: '0px 8px 18px rgba(0,0,0,0.08)',
-	},
-	deviceHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 8,
-	},
-	deviceIcon: {
-		marginTop: 2,
-	},
-	title: {
-		fontSize: 18,
-		fontWeight: '700',
-		color: '#111',
-	},
-	subtitle: {
-		marginTop: 4,
-		color: '#666',
+	card: {},
+	cardFull: {
+		flex: 1,
+		padding: 20,
+		borderRadius: 24,
 	},
 	nowPlayingCard: {
-		marginTop: 16,
+		flex: 1,
 		padding: 0,
 		borderRadius: 12,
 		position: 'relative',
 	},
-	powerButton: {
+	nowPlayingCardFull: {
+		paddingBottom: 164,
+	},
+	playbackMeta: {
+		marginTop: 12,
+	},
+	playbackMetaBottom: {
 		position: 'absolute',
-		top: 10,
-		right: 10,
-		width: 26,
-		height: 26,
-		borderRadius: 13,
-		backgroundColor: '#111',
-		alignItems: 'center',
-		justifyContent: 'center',
-		zIndex: 1,
+		left: 0,
+		right: 0,
+		bottom: 8,
 	},
 	nowPlayingHeader: {
 		paddingHorizontal: 16,
@@ -254,7 +212,6 @@ const styles = StyleSheet.create({
 	controlButton: {
 		width: 44,
 		height: 44,
-		borderRadius: 22,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},

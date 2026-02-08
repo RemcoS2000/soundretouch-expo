@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Alert, Platform, ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { AddDeviceManualModal } from '../modals/AddDeviceManualModal';
-import { useSoundTouchDevices } from '../state/SoundTouchDevicesContext';
+import { AddDeviceManualModal } from '../../modals/AddDeviceManualModal';
+import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext';
 
 export default function DeviceManagerScreen() {
 	const [manualVisible, setManualVisible] = useState(false);
@@ -126,12 +126,6 @@ const styles = StyleSheet.create({
 	closeText: {
 		color: '#111',
 		fontWeight: '600',
-	},
-	card: {
-		backgroundColor: '#fff',
-		padding: 20,
-		borderRadius: 16,
-		boxShadow: '0px 8px 16px rgba(0,0,0,0.08)',
 	},
 	cardSpaced: {
 		marginTop: 24,
