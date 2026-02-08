@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useNowPlaying } from '../../../hooks/useNowPlaying';
+import { useInfo } from '../../../hooks/useInfo';
 
 type DeviceSummaryCardProps = {
 	activeDevice: SoundTouchDevice | null;
@@ -12,7 +12,7 @@ type DeviceSummaryCardProps = {
 
 export function DeviceSummaryCard({ activeDevice, isExpanded, onPress }: DeviceSummaryCardProps) {
 	// Keep card label in sync with the active device info payload.
-	const { info } = useNowPlaying(activeDevice);
+	const { info } = useInfo(activeDevice);
 
 	// Sends a POWER key press/release directly to the active speaker.
 	const handlePower = useCallback(async () => {
