@@ -5,6 +5,7 @@ import type { SoundTouchDevice } from '@soundretouch/api/device';
 import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext';
 
 type ZoneControlCardProps = {
+	/** Base device whose zone/group we are managing. */
 	device: SoundTouchDevice;
 };
 

@@ -15,8 +15,10 @@ type DeviceControlBottomSheetProps = {
 };
 
 export function DeviceControlBottomSheet({ device, expandedTopOffset }: DeviceControlBottomSheetProps) {
+	// BottomSheet requires a concrete container height to calculate open/closed offsets.
 	const { height: screenHeight } = useWindowDimensions();
 
+	// Keep home screen clean when no active speaker exists.
 	if (!device) return null;
 
 	return (

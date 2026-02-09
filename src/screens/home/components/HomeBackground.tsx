@@ -4,9 +4,10 @@ import type { SoundTouchDevice } from '@soundretouch/api/device';
 import { useNowPlaying } from '../../../hooks/useNowPlaying';
 
 const BACKGROUND_FADE_MS = 320;
-const BACKGROUND_MAX_OPACITY = 0.75;
+const BACKGROUND_MAX_OPACITY = 0.84;
 
 type HomeBackgroundProps = {
+	/** Active device used to resolve current artwork. When `null`, only the readability overlay is shown. */
 	device: SoundTouchDevice | null;
 };
 
@@ -41,10 +42,10 @@ export function HomeBackground({ device }: HomeBackgroundProps) {
 const styles = StyleSheet.create({
 	backgroundArt: {
 		...StyleSheet.absoluteFillObject,
-		opacity: 0.75,
+		opacity: BACKGROUND_MAX_OPACITY,
 	},
 	backgroundOverlay: {
 		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'rgba(255,255,255,0.66)',
+		backgroundColor: 'rgba(255,255,255,0.54)',
 	},
 });

@@ -6,8 +6,11 @@ import { NowPlayingCard } from './NowPlayingCard';
 type ScrollEvent = { nativeEvent: { contentOffset: { x: number } } };
 
 type DeviceCarouselProps = {
+	/** Ordered list of devices that become horizontal pages in the carousel. */
 	devices: SoundTouchDeviceEntry[];
+	/** Reserved bottom spacing (px), typically matching the collapsed bottom-sheet height (+ breathing room). */
 	footerHeight: number;
+	/** Called whenever the nearest visible page index changes after/while scrolling. Receives a bounded index. */
 	onActiveIndexChange: (index: number) => void;
 };
 
