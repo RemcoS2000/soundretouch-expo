@@ -40,7 +40,9 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 
 	// Transport key actions are delegated to the SoundTouch device API.
 	const sendKey = useCallback(
-		async (key: 'PLAY_PAUSE' | 'PREV_TRACK' | 'NEXT_TRACK' | 'SHUFFLE_ON' | 'SHUFFLE_OFF' | 'REPEAT_ALL' | 'REPEAT_OFF') => {
+		async (
+			key: 'PLAY_PAUSE' | 'PREV_TRACK' | 'NEXT_TRACK' | 'SHUFFLE_ON' | 'SHUFFLE_OFF' | 'REPEAT_ALL' | 'REPEAT_ONE' | 'REPEAT_OFF'
+		) => {
 			try {
 				await device.keyPressAndRelease(key);
 			} catch {
@@ -233,6 +235,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'flex-start',
 		height: 30,
+	},
+	modeIcon: {
+		marginTop: 1,
 	},
 	modeActiveDot: {
 		marginTop: 2,
