@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
 import { useInfo } from '../../../hooks/useInfo';
+import { useNowPlaying } from '../../../hooks/useNowPlaying';
 
 type DeviceSummaryCardProps = {
 	activeDevice: SoundTouchDevice | null;
@@ -13,6 +14,8 @@ type DeviceSummaryCardProps = {
 export function DeviceSummaryCard({ activeDevice, isExpanded, onPress }: DeviceSummaryCardProps) {
 	// Keep card label in sync with the active device info payload.
 	const { info } = useInfo(activeDevice);
+	const { nowPlaying } = useNowPlaying(activeDevice);
+	const isPoweredOff = nowPlaying?.source === 'STANDBY';
 
 	// Sends a POWER key press/release directly to the active speaker.
 	const handlePower = useCallback(async () => {
@@ -27,7 +30,7 @@ export function DeviceSummaryCard({ activeDevice, isExpanded, onPress }: DeviceS
 	// Footer is hidden when there is no selected device.
 	if (!activeDevice) return null;
 
-	const deviceName = info?.name ?? 'SoundTouch device';
+	const deviceName = info?.name;
 
 	return (
 		<TouchableOpacity
@@ -48,7 +51,7 @@ export function DeviceSummaryCard({ activeDevice, isExpanded, onPress }: DeviceS
 
 			{/* Right: direct power action without toggling overlay state */}
 			<TouchableOpacity
-				style={styles.powerButton}
+				style={[styles.powerButton, isPoweredOff ? styles.powerButtonOff : styles.powerButtonOn]}
 				accessibilityLabel="Power"
 				onPress={(event) => {
 					// Prevent bubbling so only power action runs.
@@ -56,7 +59,7 @@ export function DeviceSummaryCard({ activeDevice, isExpanded, onPress }: DeviceS
 					void handlePower();
 				}}
 			>
-				<MaterialIcons name="power-settings-new" size={16} color="#fff" />
+				<MaterialIcons name="power-settings-new" size={16} color={isPoweredOff ? '#fff' : '#111'} />
 			</TouchableOpacity>
 		</TouchableOpacity>
 	);
@@ -98,8 +101,13 @@ const styles = StyleSheet.create({
 		width: 28,
 		height: 28,
 		borderRadius: 14,
-		backgroundColor: '#111',
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	powerButtonOn: {
+		backgroundColor: 'transparent',
+	},
+	powerButtonOff: {
+		backgroundColor: '#111',
 	},
 });
