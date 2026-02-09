@@ -6,29 +6,32 @@ import { useInfo } from '../../../hooks/useInfo';
 import { useNowPlaying } from '../../../hooks/useNowPlaying';
 
 type DeviceSummaryCardProps = {
-	activeDevice: SoundTouchDevice | null;
+	/** Device shown in the summary row. When `null`, the card renders nothing. */
+	device: SoundTouchDevice | null;
+	/** Expansion state for subtitle/accessibility text; visual layout stays the same. */
 	isExpanded: boolean;
+	/** Primary press action, usually toggles the bottom sheet open/closed. */
 	onPress: () => void;
 };
 
-export function DeviceSummaryCard({ activeDevice, isExpanded, onPress }: DeviceSummaryCardProps) {
+export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummaryCardProps) {
 	// Keep card label in sync with the active device info payload.
-	const { info } = useInfo(activeDevice);
-	const { nowPlaying } = useNowPlaying(activeDevice);
+	const { info } = useInfo(device);
+	const { nowPlaying } = useNowPlaying(device);
 	const isPoweredOff = nowPlaying?.source === 'STANDBY';
 
 	// Sends a POWER key press/release directly to the active speaker.
 	const handlePower = useCallback(async () => {
-		if (!activeDevice) return;
+		if (!device) return;
 		try {
-			await activeDevice.keyPressAndRelease('POWER');
+			await device.keyPressAndRelease('POWER');
 		} catch {
 			// Ignore control failures for now.
 		}
-	}, [activeDevice]);
+	}, [device]);
 
 	// Footer is hidden when there is no selected device.
-	if (!activeDevice) return null;
+	if (!device) return null;
 
 	const deviceName = info?.name;
 

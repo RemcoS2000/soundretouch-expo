@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext';
 import { HomeBackground } from './components/HomeBackground';
 import { DeviceCarousel } from './components/DeviceCarousel';
-import { DeviceControlOverlay } from './components/DeviceControlOverlay';
+import { DeviceControlBottomSheet } from './components/DeviceControlBottomSheet';
 
 const FOOTER_HEIGHT = 84;
 const FOOTER_EXPANDED_TOP_OFFSET = 20;
@@ -21,7 +21,6 @@ export default function HomeScreen() {
 	// Most of the screen (now playing card, overlay content, footer actions) depends on this value.
 	const activeDeviceIndex = devices.length === 0 ? 0 : Math.max(0, Math.min(activeIndex, devices.length - 1));
 	const activeDevice = devices[activeDeviceIndex]?.device ?? null;
-	const { height: screenHeight } = useWindowDimensions();
 
 	return (
 		<View style={styles.container}>
@@ -47,11 +46,9 @@ export default function HomeScreen() {
 				<DeviceCarousel devices={devices} footerHeight={FOOTER_HEIGHT} onActiveIndexChange={(index) => setActiveIndex(index)} />
 
 				{/* Overlay Section: device controls/settings panel that slides over the carousel */}
-				<DeviceControlOverlay
+				<DeviceControlBottomSheet
 					key={activeDevice?.host ?? 'no-device'}
 					device={activeDevice}
-					footerHeight={FOOTER_HEIGHT}
-					screenHeight={screenHeight}
 					expandedTopOffset={FOOTER_EXPANDED_TOP_OFFSET}
 				/>
 			</View>
