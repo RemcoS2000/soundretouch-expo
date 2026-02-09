@@ -1,120 +1,149 @@
-import React, { useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, type DimensionValue, type ViewStyle } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, type DimensionValue } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
 import { useNowPlaying } from '../../../hooks/useNowPlaying';
 
 type NowPlayingCardProps = {
+	/** Device instance used for now-playing polling/subscription and media key actions. */
 	device: SoundTouchDevice;
 };
 
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
-	const { nowPlaying, displayTime, artUrl } = useNowPlaying(device);
+	const { nowPlaying, artUrl } = useNowPlaying(device);
 
-	// Fallback-safe labels when upstream payload misses fields.
-	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || 'Unknown track';
-	const artist = nowPlaying?.artist || 'Unknown artist';
+	// Extract nowPlaying details
+	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || '';
+	const artist = nowPlaying?.artist || '';
 	const album = nowPlaying?.album;
+	const source = nowPlaying?.source ?? null;
+	const shuffleSetting = nowPlaying?.shuffleSetting ?? '';
+	const repeatSetting = nowPlaying?.repeatSetting ?? '';
+	const isStandby = source === 'STANDBY';
 
-	// Use smoothed ticker time when available, otherwise raw device time.
-	const displaySeconds = displayTime ?? nowPlaying?.time?.['#text'] ?? 0;
+	// Derive common state booleans for visual and interaction logic.
+	const hasNowPlaying = Boolean(nowPlaying);
+	const isPlaying = nowPlaying?.playStatus === 'PLAY_STATE';
+	const isShuffleOn = shuffleSetting === 'SHUFFLE_ON';
+	const isRepeatOn = repeatSetting === 'REPEAT_ALL' || repeatSetting === 'REPEAT_ONE';
+	const repeatIconName = repeatSetting === 'REPEAT_ONE' ? 'repeat-one' : 'repeat';
+	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF';
+	const repeatA11yLabel =
+		repeatSetting === 'REPEAT_OFF' ? 'Enable repeat all' : repeatSetting === 'REPEAT_ALL' ? 'Switch to repeat one' : 'Disable repeat';
+
+	// Use raw device-provided playback time.
+	const displaySeconds = nowPlaying?.time?.['#text'] ?? 0;
 	const totalTime = nowPlaying?.time?.total ?? 0;
 	const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0;
-	const progressWidth = useMemo(() => `${(progress * 100).toFixed(2)}%` as DimensionValue, [progress]);
-	const isPlaying = nowPlaying?.playStatus === 'PLAY_STATE';
-	const containerStyle = useMemo<ViewStyle[]>(() => [styles.card, styles.cardFull], []);
-	const nowPlayingCardStyle = useMemo<ViewStyle[]>(() => [styles.nowPlayingCard, styles.nowPlayingCardFull], []);
+	const progressWidth = `${(progress * 100).toFixed(2)}%` as DimensionValue;
 
 	// Transport key actions are delegated to the SoundTouch device API.
-	const handlePlayPause = useCallback(async () => {
-		try {
-			await device.keyPressAndRelease('PLAY_PAUSE');
-		} catch {
-			// Ignore control failures for now.
-		}
-	}, [device]);
-
-	const handlePrevious = useCallback(async () => {
-		try {
-			await device.keyPressAndRelease('PREV_TRACK');
-		} catch {
-			// Ignore control failures for now.
-		}
-	}, [device]);
-
-	const handleNext = useCallback(async () => {
-		try {
-			await device.keyPressAndRelease('NEXT_TRACK');
-		} catch {
-			// Ignore control failures for now.
-		}
-	}, [device]);
+	const sendKey = useCallback(
+		async (key: 'PLAY_PAUSE' | 'PREV_TRACK' | 'NEXT_TRACK' | 'SHUFFLE_ON' | 'SHUFFLE_OFF' | 'REPEAT_ALL' | 'REPEAT_OFF') => {
+			try {
+				await device.keyPressAndRelease(key);
+			} catch {
+				// Ignore control failures for now.
+			}
+		},
+		[device]
+	);
 
 	return (
-		<View style={containerStyle}>
-			<View style={nowPlayingCardStyle}>
-				{/* Header is hidden in standby mode to keep the state-focused empty view clean. */}
-				{nowPlaying?.source !== 'STANDBY' && (
-					<View style={styles.nowPlayingHeader}>
-						<Text style={styles.nowPlayingTitle}>Now playing</Text>
-						{nowPlaying?.source && (
-							<View style={styles.sourcePill}>
-								<Text style={styles.sourceText}>{nowPlaying.source}</Text>
-							</View>
-						)}
-					</View>
-				)}
-
-				{/* Cover art stays visible for active sources and drives the visual focus. */}
-				{artUrl && <Image source={{ uri: artUrl }} style={styles.artwork} />}
-
-				{/* Standby has a dedicated stencil-style view. */}
-				{nowPlaying?.source === 'STANDBY' ? (
-					<View style={styles.standbyCard}>
-						<View style={styles.standbyIcon}>
-							<MaterialIcons name="speaker" size={28} color="#999" />
+		<View style={styles.cardFull}>
+			<View style={styles.nowPlayingCard}>
+				{/* Header stays visible in standby so source state is still clear to the user. */}
+				<View style={styles.nowPlayingHeader}>
+					<Text style={styles.nowPlayingTitle}>Now playing</Text>
+					{source && (
+						<View style={styles.sourcePill}>
+							<Text style={styles.sourceText}>{source}</Text>
 						</View>
-						<Text style={styles.standbyTitle}>In standby</Text>
-						<Text style={styles.standbySubtitle}>Sleeping speaker · zzz</Text>
-					</View>
-				) : nowPlaying ? (
+					)}
+				</View>
+
+				{/* Hide playback content in standby, but keep the source pill in the header. */}
+				{!isStandby && artUrl ? <Image source={{ uri: artUrl }} style={styles.artwork} /> : null}
+
+				{!isStandby && hasNowPlaying ? (
 					// Active playback view: metadata + progress + transport controls.
-					<View style={[styles.playbackMeta, styles.playbackMetaBottom]}>
-						<Text style={styles.trackTitle}>{title}</Text>
-						<Text style={styles.trackMeta}>
-							{artist}
-							{album ? ` • ${album}` : ''}
-						</Text>
+					<View style={styles.playbackMeta}>
+						{title ? (
+							<Text style={styles.trackTitle} numberOfLines={1} ellipsizeMode="tail">
+								{title}
+							</Text>
+						) : null}
+						{artist || album ? (
+							<Text style={styles.trackMeta} numberOfLines={1} ellipsizeMode="tail">
+								{artist}
+								{album ? ` • ${album}` : ''}
+							</Text>
+						) : null}
 						<View style={styles.progressBar}>
 							<View style={[styles.progressFill, { width: progressWidth }]} />
 						</View>
 						<View style={styles.controls}>
-							<TouchableOpacity style={styles.controlButton} accessibilityLabel="Previous" onPress={handlePrevious}>
+							<TouchableOpacity
+								style={styles.controlButton}
+								accessibilityLabel={isShuffleOn ? 'Disable shuffle' : 'Enable shuffle'}
+								onPress={() => void sendKey(isShuffleOn ? 'SHUFFLE_OFF' : 'SHUFFLE_ON')}
+							>
+								<View style={styles.modeButtonContent}>
+									<MaterialIcons name="shuffle" size={24} color={isShuffleOn ? '#111' : '#666'} />
+									{isShuffleOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
+								</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={styles.controlButton}
+								accessibilityLabel="Previous"
+								onPress={() => void sendKey('PREV_TRACK')}
+							>
 								<MaterialIcons name="skip-previous" size={24} color="#111" />
 							</TouchableOpacity>
-							<TouchableOpacity style={styles.controlButton} accessibilityLabel="Play or pause" onPress={handlePlayPause}>
+							<TouchableOpacity
+								style={styles.controlButton}
+								accessibilityLabel="Play or pause"
+								onPress={() => void sendKey('PLAY_PAUSE')}
+							>
 								<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#111" />
 							</TouchableOpacity>
-							<TouchableOpacity style={styles.controlButton} accessibilityLabel="Next" onPress={handleNext}>
-								<MaterialIcons name="skip-next" size={24} color="#111" />
+							<TouchableOpacity
+								style={styles.controlButton}
+								accessibilityLabel="Next"
+								onPress={() => void sendKey('NEXT_TRACK')}
+							>
+								<View style={styles.modeButtonContent}>
+									<MaterialIcons name="skip-next" size={24} color="#111" />
+									<View style={styles.modeActiveDotSpacer} />
+								</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={styles.controlButton}
+								accessibilityLabel={repeatA11yLabel}
+								onPress={() => void sendKey(nextRepeatKey)}
+							>
+								<View style={styles.modeButtonContent}>
+									<MaterialIcons
+										name={repeatIconName}
+										size={24}
+										color={isRepeatOn ? '#111' : '#666'}
+										style={styles.modeIcon}
+									/>
+									{isRepeatOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
+								</View>
 							</TouchableOpacity>
 						</View>
 					</View>
-				) : (
-					// Fallback when no state has been retrieved yet.
-					<Text style={styles.nowPlayingSubtitle}>No track information yet.</Text>
-				)}
+				) : null}
 			</View>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
-	card: {},
 	cardFull: {
 		flex: 1,
-		padding: 20,
 		borderRadius: 24,
 	},
 	nowPlayingCard: {
@@ -123,22 +152,14 @@ const styles = StyleSheet.create({
 		borderRadius: 12,
 		position: 'relative',
 	},
-	nowPlayingCardFull: {
-		paddingBottom: 164,
-	},
 	playbackMeta: {
-		marginTop: 12,
-	},
-	playbackMetaBottom: {
-		position: 'absolute',
-		left: 0,
-		right: 0,
-		bottom: 8,
+		marginTop: 8,
+		padding: 5,
 	},
 	nowPlayingHeader: {
-		paddingHorizontal: 16,
 		paddingTop: 14,
 		paddingBottom: 8,
+		paddingHorizontal: 5,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
@@ -162,11 +183,6 @@ const styles = StyleSheet.create({
 		fontSize: 10,
 		fontWeight: '600',
 	},
-	nowPlayingSubtitle: {
-		color: '#444',
-		paddingHorizontal: 16,
-		paddingVertical: 14,
-	},
 	artwork: {
 		width: '100%',
 		aspectRatio: 1,
@@ -176,20 +192,19 @@ const styles = StyleSheet.create({
 	trackTitle: {
 		fontSize: 16,
 		fontWeight: '700',
+		lineHeight: 22,
 		color: '#111',
-		paddingHorizontal: 16,
-		paddingTop: 12,
-		textAlign: 'center',
+		paddingTop: 0,
+		textAlign: 'left',
 	},
 	trackMeta: {
 		marginTop: 4,
+		lineHeight: 18,
 		color: '#666',
-		paddingHorizontal: 16,
-		textAlign: 'center',
+		textAlign: 'left',
 	},
 	progressBar: {
 		marginTop: 12,
-		marginHorizontal: 16,
 		height: 6,
 		borderRadius: 999,
 		backgroundColor: '#e5e7eb',
@@ -204,40 +219,32 @@ const styles = StyleSheet.create({
 		marginTop: 12,
 		marginBottom: 14,
 		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: 12,
-		paddingHorizontal: 16,
+		justifyContent: 'space-between',
+		alignItems: 'flex-start',
+		paddingHorizontal: 8,
 	},
 	controlButton: {
 		width: 44,
-		height: 44,
+		height: 48,
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'flex-start',
 	},
-	standbyCard: {
-		marginTop: 10,
+	modeButtonContent: {
 		alignItems: 'center',
-		paddingVertical: 16,
-		backgroundColor: '#f4f5f7',
-		borderRadius: 12,
+		justifyContent: 'flex-start',
+		height: 30,
 	},
-	standbyIcon: {
-		width: 52,
-		height: 52,
-		borderRadius: 26,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
-		marginBottom: 10,
+	modeActiveDot: {
+		marginTop: 2,
+		width: 4,
+		height: 4,
+		borderRadius: 2,
+		backgroundColor: '#111',
 	},
-	standbyTitle: {
-		fontSize: 14,
-		fontWeight: '700',
-		color: '#555',
-	},
-	standbySubtitle: {
-		marginTop: 4,
-		color: '#888',
+	modeActiveDotSpacer: {
+		marginTop: 2,
+		width: 4,
+		height: 4,
+		opacity: 0,
 	},
 });
