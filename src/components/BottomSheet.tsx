@@ -6,8 +6,6 @@ type BottomSheetProps = {
 	footerHeight: number;
 	/** Full available container height, usually window/screen height in px. */
 	screenHeight: number;
-	/** Top offset (px) when fully expanded; `0` means flush with the top edge. */
-	expandedTopOffset: number;
 	/** Renders the fixed summary row and receives expansion state + toggle action. */
 	renderSummary: (args: { isExpanded: boolean; toggle: () => void }) => React.ReactNode;
 	/** Main expanded content shown inside the sheet scroll area. */
@@ -22,15 +20,14 @@ const MAX_SPRING_VELOCITY = 3.5;
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 
-export function BottomSheet({ footerHeight, screenHeight, expandedTopOffset, renderSummary, children }: BottomSheetProps) {
+export function BottomSheet({ footerHeight, screenHeight, renderSummary, children }: BottomSheetProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
 	const [overlayHeight, setOverlayHeight] = useState(0);
 
-	const containerHeight = overlayHeight || screenHeight;
-	const closedOffset = Math.max(0, containerHeight - footerHeight);
-	const openOffset = Math.max(0, expandedTopOffset);
-	const dragDistance = Math.max(1, closedOffset - openOffset);
+	const availableHeight = Math.max(1, overlayHeight || screenHeight);
+	const closedOffset = Math.max(0, availableHeight - footerHeight);
+	const dragDistance = Math.max(1, closedOffset);
 
 	const [progress] = useState(() => new Animated.Value(0));
 	const progressValueRef = useRef(0);
@@ -100,7 +97,7 @@ export function BottomSheet({ footerHeight, screenHeight, expandedTopOffset, ren
 
 	const translateY = progress.interpolate({
 		inputRange: [0, 1],
-		outputRange: [closedOffset, openOffset],
+		outputRange: [closedOffset, 0],
 	});
 
 	const handleMoveShouldSetResponder = useCallback(() => true, []);
@@ -228,6 +225,8 @@ export function BottomSheet({ footerHeight, screenHeight, expandedTopOffset, ren
 							<ScrollView
 								contentContainerStyle={[styles.content, { paddingTop: 8, paddingBottom: footerHeight + 24 }]}
 								showsVerticalScrollIndicator={false}
+								bounces={false}
+								overScrollMode="never"
 							>
 								{children}
 							</ScrollView>
@@ -254,7 +253,11 @@ const styles = StyleSheet.create({
 		zIndex: 20,
 	},
 	panel: {
-		...StyleSheet.absoluteFillObject,
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
 		backgroundColor: '#fff',
 		borderTopLeftRadius: 16,
 		borderTopRightRadius: 16,

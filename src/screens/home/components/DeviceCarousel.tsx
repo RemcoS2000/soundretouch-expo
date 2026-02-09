@@ -69,12 +69,18 @@ export function DeviceCarousel({ devices, footerHeight, onActiveIndexChange }: D
 		<FlatList
 			data={devices}
 			horizontal
+			scrollEnabled={devices.length > 1}
 			pagingEnabled
 			showsHorizontalScrollIndicator={false}
+			bounces={false}
+			alwaysBounceHorizontal={false}
+			overScrollMode="never"
+			directionalLockEnabled
 			keyExtractor={(item) => item.device.host}
 			renderItem={renderItem}
 			snapToInterval={pageWidth}
 			decelerationRate="fast"
+			style={styles.list}
 			contentContainerStyle={[styles.carouselContainer, { paddingBottom: footerHeight + 10 }]}
 			onMomentumScrollEnd={handleMomentumScrollEnd}
 			onScrollEndDrag={handleScrollEndDrag}
@@ -85,6 +91,10 @@ export function DeviceCarousel({ devices, footerHeight, onActiveIndexChange }: D
 }
 
 const styles = StyleSheet.create({
+	list: {
+		flex: 1,
+		width: '100%',
+	},
 	carouselContainer: {
 		paddingHorizontal: 0,
 	},

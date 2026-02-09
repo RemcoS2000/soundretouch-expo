@@ -8,7 +8,6 @@ import { DeviceCarousel } from './components/DeviceCarousel';
 import { DeviceControlBottomSheet } from './components/DeviceControlBottomSheet';
 
 const FOOTER_HEIGHT = 84;
-const FOOTER_EXPANDED_TOP_OFFSET = 20;
 
 export default function HomeScreen() {
 	const router = useRouter();
@@ -46,11 +45,7 @@ export default function HomeScreen() {
 				<DeviceCarousel devices={devices} footerHeight={FOOTER_HEIGHT} onActiveIndexChange={(index) => setActiveIndex(index)} />
 
 				{/* Overlay Section: device controls/settings panel that slides over the carousel */}
-				<DeviceControlBottomSheet
-					key={activeDevice?.host ?? 'no-device'}
-					device={activeDevice}
-					expandedTopOffset={FOOTER_EXPANDED_TOP_OFFSET}
-				/>
+				<DeviceControlBottomSheet key={activeDevice?.host ?? 'no-device'} device={activeDevice} />
 			</View>
 		</View>
 	);
@@ -62,6 +57,7 @@ const styles = StyleSheet.create({
 		paddingTop: 60,
 		paddingBottom: 0,
 		backgroundColor: '#f3f4f6',
+		overflow: 'hidden',
 	},
 	header: {
 		flexDirection: 'row',
