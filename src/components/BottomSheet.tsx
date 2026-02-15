@@ -33,6 +33,7 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 	const progressValueRef = useRef(0)
 	const dragStartProgressRef = useRef(0)
 	const dragStartYRef = useRef(0)
+	const dragStartXRef = useRef(0)
 	const dragLastYRef = useRef(0)
 	const dragLastTsRef = useRef(0)
 	const dragVelocityYRef = useRef(0)
@@ -100,7 +101,17 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 		outputRange: [closedOffset, 0],
 	})
 
-	const handleMoveShouldSetResponder = useCallback(() => true, [])
+	const handleStartShouldSetResponderCapture = useCallback((event: GestureResponderEvent) => {
+		dragStartXRef.current = event.nativeEvent.pageX
+		dragStartYRef.current = event.nativeEvent.pageY
+		return false
+	}, [])
+
+	const handleMoveShouldSetResponder = useCallback((event: GestureResponderEvent) => {
+		const dx = Math.abs(event.nativeEvent.pageX - dragStartXRef.current)
+		const dy = Math.abs(event.nativeEvent.pageY - dragStartYRef.current)
+		return dy > 6 && dy > dx
+	}, [])
 
 	const handleResponderGrant = useCallback(
 		(event: GestureResponderEvent) => {
@@ -168,6 +179,7 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 	}, [close])
 
 	const dragResponderProps = {
+		onStartShouldSetResponderCapture: handleStartShouldSetResponderCapture,
 		onMoveShouldSetResponder: handleMoveShouldSetResponder,
 		onResponderGrant: handleResponderGrant,
 		onResponderMove: handleResponderMove,
