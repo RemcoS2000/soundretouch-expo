@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'r
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
 import { BottomSheet } from '../../../components/BottomSheet';
+import { DevicePresetSelectionCard } from './DevicePresetSelectionCard';
 import { DeviceSummaryCard } from './DeviceSummaryCard';
 import { DeviceSourceSelectionCard } from './DeviceSourceSelectionCard';
 import { ZoneControlCard } from './ZoneControlCard';
@@ -63,12 +64,15 @@ export function DeviceControlBottomSheet({ device }: DeviceControlBottomSheetPro
 				</TouchableOpacity>
 			</View>
 			{activePanel === 'source' ? (
-				<DeviceSourceSelectionCard
-					device={device}
-					onSelected={() => {
-						if (isExpandedRef.current) toggleRef.current();
-					}}
-				/>
+				<View style={styles.sourcePanel}>
+					<DevicePresetSelectionCard device={device} />
+					<DeviceSourceSelectionCard
+						device={device}
+						onSelected={() => {
+							if (isExpandedRef.current) toggleRef.current();
+						}}
+					/>
+				</View>
 			) : (
 				<ZoneControlCard device={device} />
 			)}
@@ -101,5 +105,8 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		fontWeight: '600',
 		color: '#111',
+	},
+	sourcePanel: {
+		flex: 1,
 	},
 });

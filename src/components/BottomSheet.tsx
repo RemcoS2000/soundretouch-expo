@@ -221,9 +221,8 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 
 					{isVisible && (
 						<>
-							<View style={styles.topBar} {...dragResponderProps} />
 							<ScrollView
-								contentContainerStyle={[styles.content, { paddingTop: 8, paddingBottom: footerHeight + 24 }]}
+								contentContainerStyle={[styles.content, { paddingTop: 0, paddingBottom: footerHeight + 24 }]}
 								showsVerticalScrollIndicator={false}
 								bounces={false}
 								overScrollMode="never"
@@ -284,12 +283,5 @@ const styles = StyleSheet.create({
 	content: {
 		paddingHorizontal: 20,
 		gap: 12,
-	},
-	topBar: {
-		alignItems: 'center',
-		justifyContent: 'center',
-		paddingTop: 10,
-		paddingBottom: 6,
-		zIndex: 2,
 	},
 });

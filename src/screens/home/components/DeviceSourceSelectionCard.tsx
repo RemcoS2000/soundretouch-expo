@@ -4,28 +4,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 import type { SoundTouchDevice } from '@soundretouch/api/device';
 import { useNowPlaying } from '../../../hooks/useNowPlaying';
 import { useSources } from '../../../hooks/useSources';
+import { getSourceIconName } from '../../../utils';
 
 type DeviceSourceSelectionCardProps = {
 	device: SoundTouchDevice;
 	onSelected?: () => void;
-};
-
-// Hardcoded source-to-icon mapping so source rows can show recognizable icons.
-const getSourceIconName = (source?: string) => {
-	switch (source?.toUpperCase()) {
-		case 'AUX':
-			return 'headset';
-		case 'SPOTIFY':
-			return 'music-note';
-		case 'TUNEIN':
-			return 'radio';
-		case 'LOCAL_INTERNET_RADIO':
-			return 'language';
-		case 'BLUETOOTH':
-			return 'bluetooth';
-		default:
-			return 'audiotrack';
-	}
 };
 
 export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSelectionCardProps) {
@@ -35,6 +18,7 @@ export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSe
 
 	return (
 		<View style={styles.container}>
+			<Text style={styles.title}>Sources</Text>
 			{sourceItems.length > 0 ? (
 				<ScrollView style={styles.listScroll} showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never">
 					<View style={styles.list}>
@@ -85,6 +69,14 @@ const styles = StyleSheet.create({
 		flex: 1,
 		borderRadius: 12,
 		paddingHorizontal: 5,
+	},
+	title: {
+		marginBottom: 8,
+		fontSize: 12,
+		fontWeight: '700',
+		letterSpacing: 0.5,
+		textTransform: 'uppercase',
+		color: '#666',
 	},
 	list: {
 		gap: 8,
