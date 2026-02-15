@@ -4,13 +4,16 @@ import { useRouter } from 'expo-router'
 import React, { useMemo, useState } from 'react'
 import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import { AppBackground } from '../../components/AppBackground'
 import { AddDeviceManualModal } from '../../modals/AddDeviceManualModal'
+import { useSettings } from '../../state/SettingsContext'
 import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
 export default function DeviceManagerScreen() {
 	const [manualVisible, setManualVisible] = useState(false)
 	const router = useRouter()
 	const { devices, removeDevice } = useSoundTouchDevices()
+	const { colors } = useSettings()
 
 	// Normalize device entries for rendering.
 	const deviceList = useMemo(
@@ -38,59 +41,60 @@ export default function DeviceManagerScreen() {
 	}
 
 	return (
-		<View style={styles.container}>
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
+			<AppBackground device={null} />
 			{/* Fixed header; content scrolls beneath. */}
 			<View style={styles.headerRow}>
-				<Text style={styles.headerTitle}>Devices</Text>
+				<Text style={[styles.headerTitle, { color: colors.text }]}>Devices</Text>
 				<TouchableOpacity onPress={() => router.back()}>
-					<Text style={styles.closeText}>Close</Text>
+					<Text style={[styles.closeText, { color: colors.text }]}>Close</Text>
 				</TouchableOpacity>
 			</View>
 			{/* Device list and actions. */}
 			<ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 				{deviceList.length > 0 ? (
-					<View style={styles.listCardTop}>
-						<Text style={styles.listTitle}>Added devices</Text>
-						<Text style={styles.listSubtitle}>Speakers already linked to this app.</Text>
+					<View style={[styles.listCardTop, { backgroundColor: colors.surfaceElevated }]}>
+						<Text style={[styles.listTitle, { color: colors.text }]}>Added devices</Text>
+						<Text style={[styles.listSubtitle, { color: colors.textMuted }]}>Speakers already linked to this app.</Text>
 						{deviceList.map((item) => (
-							<View key={item.host} style={styles.listRow}>
+							<View key={item.host} style={[styles.listRow, { backgroundColor: colors.surfaceMuted }]}>
 								<View style={styles.listMain}>
-									<View style={styles.deviceIcon}>
-										<MaterialIcons name="speaker" size={18} color="#111" />
+									<View style={[styles.deviceIcon, { backgroundColor: colors.surfaceElevated }]}>
+										<MaterialIcons name="speaker" size={18} color={colors.icon} />
 									</View>
 									<View>
-										<Text style={styles.listName}>{item.name}</Text>
-										<Text style={styles.listHost}>{item.host}</Text>
+										<Text style={[styles.listName, { color: colors.text }]}>{item.name}</Text>
+										<Text style={[styles.listHost, { color: colors.textMuted }]}>{item.host}</Text>
 									</View>
 								</View>
 								<TouchableOpacity onPress={() => confirmRemove(item.host, item.name)} accessibilityLabel={`Remove ${item.name}`}>
-									<MaterialIcons name="close" size={20} color="#666" />
+									<MaterialIcons name="close" size={20} color={colors.textMuted} />
 								</TouchableOpacity>
 							</View>
 						))}
 					</View>
 				) : (
-					<View style={styles.emptyCardTop}>
-						<Text style={styles.emptyText}>No devices added yet.</Text>
+					<View style={[styles.emptyCardTop, { backgroundColor: colors.surfaceElevated }]}>
+						<Text style={[styles.emptyText, { color: colors.textMuted }]}>No devices added yet.</Text>
 					</View>
 				)}
-				<View style={styles.cardSpaced}>
-					<Text style={styles.title}>Add a new speaker</Text>
-					<Text style={styles.subtitle}>Add a speaker that is already connected to your local network.</Text>
+				<View style={[styles.cardSpaced, { backgroundColor: colors.surfaceElevated }]}>
+					<Text style={[styles.title, { color: colors.text }]}>Add a new speaker</Text>
+					<Text style={[styles.subtitle, { color: colors.textMuted }]}>Add a speaker that is already connected to your local network.</Text>
 					<TouchableOpacity style={styles.primaryButton} onPress={() => setManualVisible(true)}>
 						<Text style={styles.primaryButtonText}>Add device manually</Text>
 					</TouchableOpacity>
 				</View>
-				<View style={styles.cardSpaced}>
-					<Text style={styles.title}>Automatic discovery</Text>
-					<Text style={styles.subtitle}>Scan your local network to find SoundTouch speakers automatically.</Text>
+				<View style={[styles.cardSpaced, { backgroundColor: colors.surfaceElevated }]}>
+					<Text style={[styles.title, { color: colors.text }]}>Automatic discovery</Text>
+					<Text style={[styles.subtitle, { color: colors.textMuted }]}>Scan your local network to find SoundTouch speakers automatically.</Text>
 					<TouchableOpacity style={[styles.primaryButton, styles.disabledButton]} disabled>
 						<Text style={styles.disabledButtonText}>Not yet implemented</Text>
 					</TouchableOpacity>
 				</View>
-				<View style={styles.cardSpaced}>
-					<Text style={styles.title}>Set up a new speaker</Text>
-					<Text style={styles.subtitle}>Connect a speaker that is not yet on your Wi-Fi network.</Text>
+				<View style={[styles.cardSpaced, { backgroundColor: colors.surfaceElevated }]}>
+					<Text style={[styles.title, { color: colors.text }]}>Set up a new speaker</Text>
+					<Text style={[styles.subtitle, { color: colors.textMuted }]}>Connect a speaker that is not yet on your Wi-Fi network.</Text>
 					<TouchableOpacity style={[styles.primaryButton, styles.disabledButton]} disabled>
 						<Text style={styles.disabledButtonText}>Not yet implemented</Text>
 					</TouchableOpacity>
@@ -106,7 +110,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: 20,
 		paddingTop: 60,
-		backgroundColor: '#f3f4f6',
 	},
 	scrollContent: {
 		paddingBottom: 30,
@@ -120,10 +123,8 @@ const styles = StyleSheet.create({
 	headerTitle: {
 		fontSize: 18,
 		fontWeight: '700',
-		color: '#111',
 	},
 	closeText: {
-		color: '#111',
 		fontWeight: '600',
 	},
 	cardSpaced: {
@@ -142,11 +143,9 @@ const styles = StyleSheet.create({
 	listTitle: {
 		fontSize: 18,
 		fontWeight: '700',
-		color: '#111',
 		marginBottom: 6,
 	},
 	listSubtitle: {
-		color: '#666',
 		marginBottom: 12,
 	},
 	listRow: {
@@ -175,11 +174,9 @@ const styles = StyleSheet.create({
 	listName: {
 		fontSize: 15,
 		fontWeight: '600',
-		color: '#111',
 	},
 	listHost: {
 		marginTop: 4,
-		color: '#666',
 	},
 	emptyCardTop: {
 		padding: 16,
@@ -188,18 +185,14 @@ const styles = StyleSheet.create({
 		boxShadow: '0px 8px 16px rgba(0,0,0,0.08)',
 		alignItems: 'center',
 	},
-	emptyText: {
-		color: '#666',
-	},
+	emptyText: {},
 	title: {
 		fontSize: 18,
 		fontWeight: '700',
-		color: '#111',
 	},
 	subtitle: {
 		marginTop: 6,
 		marginBottom: 18,
-		color: '#666',
 	},
 	primaryButton: {
 		backgroundColor: '#111',

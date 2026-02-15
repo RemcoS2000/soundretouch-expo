@@ -6,6 +6,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useInfo } from '../../../hooks/useInfo'
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
+import { useSettings } from '../../../state/SettingsContext'
 
 type DeviceSummaryCardProps = {
 	/** Device shown in the summary row. When `null`, the card renders nothing. */
@@ -20,6 +21,7 @@ export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummary
 	// Keep card label in sync with the active device info payload.
 	const { info } = useInfo(device)
 	const { nowPlaying } = useNowPlaying(device)
+	const { colors } = useSettings()
 	const isPoweredOff = nowPlaying?.source === 'STANDBY'
 
 	// Sends a POWER key press/release directly to the active speaker.
@@ -39,21 +41,23 @@ export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummary
 
 	return (
 		<TouchableOpacity
-			style={styles.footer}
+			style={[styles.footer, { backgroundColor: colors.surfaceElevated }]}
 			onPress={onPress}
 			activeOpacity={1}
 			accessibilityRole="button"
 			accessibilityLabel={isExpanded ? 'Collapse speaker details' : 'Open speaker details'}
 		>
 			{/* Left: device identity */}
-			<View style={styles.footerIcon}>
-				<MaterialIcons name="speaker" size={18} color="#111" />
+			<View style={[styles.footerIcon, { backgroundColor: colors.surface }]}>
+				<MaterialIcons name="speaker" size={18} color={colors.icon} />
 			</View>
 			<View style={styles.footerText}>
-				<Text style={styles.footerTitle} numberOfLines={1} ellipsizeMode="tail">
+				<Text style={[styles.footerTitle, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
 					{deviceName}
 				</Text>
-				<Text style={styles.footerSubtitle}>{isExpanded ? 'Tap to collapse details' : 'Tap to open speaker settings'}</Text>
+				<Text style={[styles.footerSubtitle, { color: colors.textMuted }]}>
+					{isExpanded ? 'Tap to collapse details' : 'Tap to open speaker settings'}
+				</Text>
 			</View>
 
 			<View style={styles.rightActions}>
@@ -67,7 +71,7 @@ export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummary
 						void handlePower()
 					}}
 				>
-					<MaterialIcons name="power-settings-new" size={16} color={isPoweredOff ? '#fff' : '#111'} />
+					<MaterialIcons name="power-settings-new" size={16} color={isPoweredOff ? '#fff' : colors.icon} />
 				</TouchableOpacity>
 			</View>
 		</TouchableOpacity>
@@ -99,12 +103,10 @@ const styles = StyleSheet.create({
 	footerTitle: {
 		fontSize: 16,
 		fontWeight: '700',
-		color: '#111',
 	},
 	footerSubtitle: {
 		marginTop: 3,
 		fontSize: 12,
-		color: '#666',
 	},
 	powerButton: {
 		width: 28,

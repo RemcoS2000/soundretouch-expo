@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 import { type DimensionValue, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
+import { useSettings } from '../../../state/SettingsContext'
 
 type NowPlayingCardProps = {
 	/** Device instance used for now-playing polling/subscription and media key actions. */
@@ -14,6 +15,7 @@ type NowPlayingCardProps = {
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
 	const { nowPlaying, artUrl } = useNowPlaying(device)
+	const { colors } = useSettings()
 
 	// Extract nowPlaying details
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''
@@ -57,6 +59,8 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 
 	const showArtwork = !hidePlaybackContent && Boolean(artUrl)
 	const showPlayback = !hidePlaybackContent && hasNowPlaying
+	const primaryColor = colors.text
+	const mutedColor = colors.mutedStrong
 	const statusMessage = isInvalidSource
 		? {
 				title: 'No source selected',
@@ -74,31 +78,31 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 			<View style={styles.cardFull}>
 				<View style={styles.nowPlayingCard}>
 					<View style={styles.nowPlayingHeader}>
-						<Text style={styles.nowPlayingTitle}>Now playing</Text>
+						<Text style={[styles.nowPlayingTitle, { color: colors.textMuted }]}>Now playing</Text>
 						{source ? (
-							<View style={styles.sourcePill}>
+							<View style={[styles.sourcePill, { backgroundColor: colors.pill }]}>
 								<Text style={styles.sourceText}>{source}</Text>
 							</View>
 						) : null}
 					</View>
 
-					{showArtwork ? <Image source={{ uri: artUrl }} style={styles.artwork} /> : null}
+					{showArtwork ? <Image source={{ uri: artUrl }} style={[styles.artwork, { backgroundColor: colors.artworkFallback }]} /> : null}
 
 					{showPlayback ? (
 						<View style={styles.playbackMeta}>
 							{title ? (
-								<Text style={styles.trackTitle} numberOfLines={1} ellipsizeMode="tail">
+								<Text style={[styles.trackTitle, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
 									{title}
 								</Text>
 							) : null}
 							{artist || album ? (
-								<Text style={styles.trackMeta} numberOfLines={1} ellipsizeMode="tail">
+								<Text style={[styles.trackMeta, { color: colors.textMuted }]} numberOfLines={1} ellipsizeMode="tail">
 									{artist}
 									{album ? ` • ${album}` : ''}
 								</Text>
 							) : null}
-							<View style={styles.progressBar}>
-								<View style={[styles.progressFill, { width: progressWidth }]} />
+							<View style={[styles.progressBar, { backgroundColor: colors.progressTrack }]}>
+								<View style={[styles.progressFill, { backgroundColor: colors.progressFill, width: progressWidth }]} />
 							</View>
 							<View style={styles.controls}>
 								<TouchableOpacity
@@ -107,26 +111,34 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 									onPress={() => void sendKey(isShuffleOn ? 'SHUFFLE_OFF' : 'SHUFFLE_ON')}
 								>
 									<View style={styles.modeButtonContent}>
-										<MaterialIcons name="shuffle" size={24} color={isShuffleOn ? '#111' : '#666'} />
-										{isShuffleOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
+										<MaterialIcons name="shuffle" size={24} color={isShuffleOn ? primaryColor : mutedColor} />
+										{isShuffleOn ? (
+											<View style={[styles.modeActiveDot, { backgroundColor: colors.progressFill }]} />
+										) : (
+											<View style={styles.modeActiveDotSpacer} />
+										)}
 									</View>
 								</TouchableOpacity>
 								<TouchableOpacity style={styles.controlButton} accessibilityLabel="Previous" onPress={() => void sendKey('PREV_TRACK')}>
-									<MaterialIcons name="skip-previous" size={24} color="#111" />
+									<MaterialIcons name="skip-previous" size={24} color={primaryColor} />
 								</TouchableOpacity>
 								<TouchableOpacity style={styles.controlButton} accessibilityLabel="Play or pause" onPress={() => void sendKey('PLAY_PAUSE')}>
-									<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#111" />
+									<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color={primaryColor} />
 								</TouchableOpacity>
 								<TouchableOpacity style={styles.controlButton} accessibilityLabel="Next" onPress={() => void sendKey('NEXT_TRACK')}>
 									<View style={styles.modeButtonContent}>
-										<MaterialIcons name="skip-next" size={24} color="#111" />
+										<MaterialIcons name="skip-next" size={24} color={primaryColor} />
 										<View style={styles.modeActiveDotSpacer} />
 									</View>
 								</TouchableOpacity>
 								<TouchableOpacity style={styles.controlButton} accessibilityLabel={repeatA11yLabel} onPress={() => void sendKey(nextRepeatKey)}>
 									<View style={styles.modeButtonContent}>
-										<MaterialIcons name={repeatIconName} size={24} color={isRepeatOn ? '#111' : '#666'} style={styles.modeIcon} />
-										{isRepeatOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
+										<MaterialIcons name={repeatIconName} size={24} color={isRepeatOn ? primaryColor : mutedColor} style={styles.modeIcon} />
+										{isRepeatOn ? (
+											<View style={[styles.modeActiveDot, { backgroundColor: colors.progressFill }]} />
+										) : (
+											<View style={styles.modeActiveDotSpacer} />
+										)}
 									</View>
 								</TouchableOpacity>
 							</View>
@@ -135,9 +147,9 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 				</View>
 			</View>
 			{statusMessage ? (
-				<View style={styles.statusCard}>
-					<Text style={styles.statusTitle}>{statusMessage.title}</Text>
-					<Text style={styles.statusSubtitle}>{statusMessage.subtitle}</Text>
+				<View style={[styles.statusCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+					<Text style={[styles.statusTitle, { color: colors.text }]}>{statusMessage.title}</Text>
+					<Text style={[styles.statusSubtitle, { color: colors.textMuted }]}>{statusMessage.subtitle}</Text>
 				</View>
 			) : null}
 		</>

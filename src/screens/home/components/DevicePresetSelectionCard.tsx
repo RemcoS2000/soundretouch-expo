@@ -6,6 +6,7 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 
 import spotifyIcon from '../../../../assets/images/spotify-icon.png'
 import { usePresets } from '../../../hooks/usePresets'
+import { useSettings } from '../../../state/SettingsContext'
 import { getSourceIconName } from '../../../utils'
 
 type DevicePresetSelectionCardProps = {
@@ -14,6 +15,7 @@ type DevicePresetSelectionCardProps = {
 
 export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardProps) {
 	const { presets } = usePresets(device)
+	const { colors } = useSettings()
 	const slots: Array<Presets[number]> = Array.from({ length: 6 })
 	for (const preset of presets) {
 		const id = Number(preset.id)
@@ -23,7 +25,7 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 
 	return (
 		<View style={styles.card}>
-			<Text style={styles.title}>Presets</Text>
+			<Text style={[styles.title, { color: colors.textMuted }]}>Presets</Text>
 			<View style={styles.grid}>
 				{slots.map((preset, index) => {
 					const containerArt = (preset?.ContentItem as { containerArt?: unknown } | undefined)?.containerArt
@@ -32,7 +34,7 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 					const isEmpty = !preset
 
 					return (
-						<View key={`preset-${index + 1}`} style={[styles.square, isEmpty ? styles.squareEmpty : null]}>
+						<View key={`preset-${index + 1}`} style={[styles.square, { backgroundColor: colors.surface }, isEmpty ? styles.squareEmpty : null]}>
 							{containerArtUri ? (
 								<Image source={{ uri: containerArtUri }} style={styles.art} />
 							) : isSpotify ? (
@@ -40,8 +42,15 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 									<Image source={spotifyIcon} style={styles.spotifyArt} resizeMode="contain" />
 								</View>
 							) : (
-								<View style={[styles.art, styles.artFallback, isEmpty ? styles.artFallbackEmpty : null]}>
-									<MaterialIcons name="music-note" size={16} color="#666" />
+								<View
+									style={[
+										styles.art,
+										styles.artFallback,
+										{ backgroundColor: colors.surfaceActive },
+										isEmpty ? styles.artFallbackEmpty : null,
+									]}
+								>
+									<MaterialIcons name="music-note" size={16} color={colors.textMuted} />
 								</View>
 							)}
 							<View style={[styles.overlay, isEmpty ? styles.overlayEmpty : null]}>

@@ -4,6 +4,7 @@ import type { SoundTouchDevice } from '@soundretouch/api/device'
 import React, { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import { useSettings } from '../../../state/SettingsContext'
 import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext'
 
 type ZoneControlCardProps = {
@@ -13,6 +14,7 @@ type ZoneControlCardProps = {
 
 export function ZoneControlCard({ device }: ZoneControlCardProps) {
 	const { devices } = useSoundTouchDevices()
+	const { colors } = useSettings()
 	const availableDevices = useMemo(
 		() =>
 			devices
@@ -26,22 +28,22 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 
 	// TODO: Call SoundTouch zone API to add/remove speakers once available.
 	return (
-		<View style={styles.card}>
+		<View style={[styles.card, { backgroundColor: colors.surfaceElevated }]}>
 			<View style={styles.header}>
 				<View style={styles.headerRow}>
-					<MaterialIcons name="speaker-group" size={18} color="#111" />
+					<MaterialIcons name="speaker-group" size={18} color={colors.icon} />
 					<View>
-						<Text style={styles.title}>Zone control</Text>
-						<Text style={styles.subtitle}>Add a speaker to this group.</Text>
+						<Text style={[styles.title, { color: colors.text }]}>Zone control</Text>
+						<Text style={[styles.subtitle, { color: colors.textMuted }]}>Add a speaker to this group.</Text>
 					</View>
 				</View>
 			</View>
 			{availableDevices.length > 0 ? (
 				<View style={styles.list}>
 					{availableDevices.map((item) => (
-						<View key={item.host} style={styles.listRow}>
+						<View key={item.host} style={[styles.listRow, { backgroundColor: colors.surfaceMuted }]}>
 							<View>
-								<Text style={styles.listName}>{item.name}</Text>
+								<Text style={[styles.listName, { color: colors.text }]}>{item.name}</Text>
 							</View>
 							<TouchableOpacity
 								style={styles.addButton}
@@ -56,7 +58,7 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 					))}
 				</View>
 			) : (
-				<Text style={styles.helperText}>No other speakers available.</Text>
+				<Text style={[styles.helperText, { color: colors.textMuted }]}>No other speakers available.</Text>
 			)}
 		</View>
 	)

@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { FlatList, ListRenderItem, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 
+import { useSettings } from '../../../state/SettingsContext'
 import type { SoundTouchDeviceEntry } from '../../../state/SoundTouchDevicesContext'
 
 import { NowPlayingCard } from './NowPlayingCard'
@@ -19,6 +20,7 @@ type DeviceCarouselProps = {
 export function DeviceCarousel({ devices, footerHeight, onActiveIndexChange }: DeviceCarouselProps) {
 	// Each carousel page fills the viewport width.
 	const { width: pageWidth } = useWindowDimensions()
+	const { colors } = useSettings()
 
 	// Render one full-width page containing a single NowPlaying card.
 	const renderItem: ListRenderItem<SoundTouchDeviceEntry> = ({ item }) => (
@@ -57,9 +59,9 @@ export function DeviceCarousel({ devices, footerHeight, onActiveIndexChange }: D
 	// Empty-state card shown when there are no linked speakers yet.
 	if (devices.length === 0) {
 		return (
-			<View style={styles.emptyCard}>
-				<Text style={styles.emptyTitle}>No speakers yet</Text>
-				<Text style={styles.emptySubtitle}>Add a device to see now playing info.</Text>
+			<View style={[styles.emptyCard, { backgroundColor: colors.surfaceElevated }]}>
+				<Text style={[styles.emptyTitle, { color: colors.text }]}>No speakers yet</Text>
+				<Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>Add a device to see now playing info.</Text>
 			</View>
 		)
 	}
@@ -106,16 +108,13 @@ const styles = StyleSheet.create({
 		marginHorizontal: 20,
 		padding: 18,
 		borderRadius: 18,
-		backgroundColor: '#fff',
 		boxShadow: '0px 8px 16px rgba(0,0,0,0.08)',
 	},
 	emptyTitle: {
 		fontSize: 16,
 		fontWeight: '600',
-		color: '#111',
 	},
 	emptySubtitle: {
 		marginTop: 6,
-		color: '#666',
 	},
 })
