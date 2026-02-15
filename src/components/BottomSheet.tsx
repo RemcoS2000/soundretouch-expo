@@ -6,8 +6,8 @@ type BottomSheetProps = {
 	footerHeight: number;
 	/** Full available container height, usually window/screen height in px. */
 	screenHeight: number;
-	/** Renders the fixed summary row and receives expansion state + toggle action. */
-	renderSummary: (args: { isExpanded: boolean; toggle: () => void }) => React.ReactNode;
+	/** Renders the fixed top content row and receives expansion state + toggle action. */
+	renderTopContent: (args: { isExpanded: boolean; toggle: () => void }) => React.ReactNode;
 	/** Main expanded content shown inside the sheet scroll area. */
 	children: React.ReactNode;
 };
@@ -20,7 +20,7 @@ const MAX_SPRING_VELOCITY = 3.5;
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 
-export function BottomSheet({ footerHeight, screenHeight, renderSummary, children }: BottomSheetProps) {
+export function BottomSheet({ footerHeight, screenHeight, renderTopContent, children }: BottomSheetProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
 	const [overlayHeight, setOverlayHeight] = useState(0);
@@ -216,7 +216,7 @@ export function BottomSheet({ footerHeight, screenHeight, renderSummary, childre
 					)}
 
 					<View style={styles.summaryWrap} {...dragResponderProps}>
-						{renderSummary({ isExpanded, toggle })}
+						{renderTopContent({ isExpanded, toggle })}
 					</View>
 
 					{isVisible && (

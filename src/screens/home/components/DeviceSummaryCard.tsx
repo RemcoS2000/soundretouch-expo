@@ -48,22 +48,26 @@ export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummary
 				<MaterialIcons name="speaker" size={18} color="#111" />
 			</View>
 			<View style={styles.footerText}>
-				<Text style={styles.footerTitle}>{deviceName}</Text>
+				<Text style={styles.footerTitle} numberOfLines={1} ellipsizeMode="tail">
+					{deviceName}
+				</Text>
 				<Text style={styles.footerSubtitle}>{isExpanded ? 'Tap to collapse details' : 'Tap to open speaker settings'}</Text>
 			</View>
 
-			{/* Right: direct power action without toggling overlay state */}
-			<TouchableOpacity
-				style={[styles.powerButton, isPoweredOff ? styles.powerButtonOff : styles.powerButtonOn]}
-				accessibilityLabel="Power"
-				onPress={(event) => {
-					// Prevent bubbling so only power action runs.
-					event.stopPropagation();
-					void handlePower();
-				}}
-			>
-				<MaterialIcons name="power-settings-new" size={16} color={isPoweredOff ? '#fff' : '#111'} />
-			</TouchableOpacity>
+			<View style={styles.rightActions}>
+				{/* Right: direct power action without toggling overlay state */}
+				<TouchableOpacity
+					style={[styles.powerButton, isPoweredOff ? styles.powerButtonOff : styles.powerButtonOn]}
+					accessibilityLabel="Power"
+					onPress={(event) => {
+						// Prevent bubbling so only power action runs.
+						event.stopPropagation();
+						void handlePower();
+					}}
+				>
+					<MaterialIcons name="power-settings-new" size={16} color={isPoweredOff ? '#fff' : '#111'} />
+				</TouchableOpacity>
+			</View>
 		</TouchableOpacity>
 	);
 }
@@ -106,6 +110,11 @@ const styles = StyleSheet.create({
 		borderRadius: 14,
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	rightActions: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
 	},
 	powerButtonOn: {
 		backgroundColor: 'transparent',

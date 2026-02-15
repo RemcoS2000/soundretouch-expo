@@ -20,13 +20,17 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	const source = nowPlaying?.source ?? null;
 	const shuffleSetting = nowPlaying?.shuffleSetting ?? '';
 	const repeatSetting = nowPlaying?.repeatSetting ?? '';
-	const isStandby = source === 'STANDBY';
 
 	// Derive common state booleans for visual and interaction logic.
 	const hasNowPlaying = Boolean(nowPlaying);
 	const isPlaying = nowPlaying?.playStatus === 'PLAY_STATE';
 	const isShuffleOn = shuffleSetting === 'SHUFFLE_ON';
 	const isRepeatOn = repeatSetting === 'REPEAT_ALL' || repeatSetting === 'REPEAT_ONE';
+	const isStandby = source === 'STANDBY';
+	const isInvalidSource = source === 'INVALID_SOURCE';
+	const isAux = source === 'AUX';
+	const hidePlaybackContent = isStandby || isInvalidSource || isAux;
+
 	const repeatIconName = repeatSetting === 'REPEAT_ONE' ? 'repeat-one' : 'repeat';
 	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF';
 	const repeatA11yLabel =
@@ -52,94 +56,113 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 		[device]
 	);
 
+	const showArtwork = !hidePlaybackContent && Boolean(artUrl);
+	const showPlayback = !hidePlaybackContent && hasNowPlaying;
+	const statusMessage = isInvalidSource
+		? {
+				title: 'No source selected',
+				subtitle: 'Select a source to start listening.',
+			}
+		: isStandby
+			? {
+					title: 'Device is stand by',
+					subtitle: 'Use the power button below to turn it on.',
+				}
+			: null;
+
 	return (
-		<View style={styles.cardFull}>
-			<View style={styles.nowPlayingCard}>
-				{/* Header stays visible in standby so source state is still clear to the user. */}
-				<View style={styles.nowPlayingHeader}>
-					<Text style={styles.nowPlayingTitle}>Now playing</Text>
-					{source && (
-						<View style={styles.sourcePill}>
-							<Text style={styles.sourceText}>{source}</Text>
-						</View>
-					)}
-				</View>
-
-				{/* Hide playback content in standby, but keep the source pill in the header. */}
-				{!isStandby && artUrl ? <Image source={{ uri: artUrl }} style={styles.artwork} /> : null}
-
-				{!isStandby && hasNowPlaying ? (
-					// Active playback view: metadata + progress + transport controls.
-					<View style={styles.playbackMeta}>
-						{title ? (
-							<Text style={styles.trackTitle} numberOfLines={1} ellipsizeMode="tail">
-								{title}
-							</Text>
+		<>
+			<View style={styles.cardFull}>
+				<View style={styles.nowPlayingCard}>
+					<View style={styles.nowPlayingHeader}>
+						<Text style={styles.nowPlayingTitle}>Now playing</Text>
+						{source ? (
+							<View style={styles.sourcePill}>
+								<Text style={styles.sourceText}>{source}</Text>
+							</View>
 						) : null}
-						{artist || album ? (
-							<Text style={styles.trackMeta} numberOfLines={1} ellipsizeMode="tail">
-								{artist}
-								{album ? ` • ${album}` : ''}
-							</Text>
-						) : null}
-						<View style={styles.progressBar}>
-							<View style={[styles.progressFill, { width: progressWidth }]} />
-						</View>
-						<View style={styles.controls}>
-							<TouchableOpacity
-								style={styles.controlButton}
-								accessibilityLabel={isShuffleOn ? 'Disable shuffle' : 'Enable shuffle'}
-								onPress={() => void sendKey(isShuffleOn ? 'SHUFFLE_OFF' : 'SHUFFLE_ON')}
-							>
-								<View style={styles.modeButtonContent}>
-									<MaterialIcons name="shuffle" size={24} color={isShuffleOn ? '#111' : '#666'} />
-									{isShuffleOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
-								</View>
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={styles.controlButton}
-								accessibilityLabel="Previous"
-								onPress={() => void sendKey('PREV_TRACK')}
-							>
-								<MaterialIcons name="skip-previous" size={24} color="#111" />
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={styles.controlButton}
-								accessibilityLabel="Play or pause"
-								onPress={() => void sendKey('PLAY_PAUSE')}
-							>
-								<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#111" />
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={styles.controlButton}
-								accessibilityLabel="Next"
-								onPress={() => void sendKey('NEXT_TRACK')}
-							>
-								<View style={styles.modeButtonContent}>
-									<MaterialIcons name="skip-next" size={24} color="#111" />
-									<View style={styles.modeActiveDotSpacer} />
-								</View>
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={styles.controlButton}
-								accessibilityLabel={repeatA11yLabel}
-								onPress={() => void sendKey(nextRepeatKey)}
-							>
-								<View style={styles.modeButtonContent}>
-									<MaterialIcons
-										name={repeatIconName}
-										size={24}
-										color={isRepeatOn ? '#111' : '#666'}
-										style={styles.modeIcon}
-									/>
-									{isRepeatOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
-								</View>
-							</TouchableOpacity>
-						</View>
 					</View>
-				) : null}
+
+					{showArtwork ? <Image source={{ uri: artUrl }} style={styles.artwork} /> : null}
+
+					{showPlayback ? (
+						<View style={styles.playbackMeta}>
+							{title ? (
+								<Text style={styles.trackTitle} numberOfLines={1} ellipsizeMode="tail">
+									{title}
+								</Text>
+							) : null}
+							{artist || album ? (
+								<Text style={styles.trackMeta} numberOfLines={1} ellipsizeMode="tail">
+									{artist}
+									{album ? ` • ${album}` : ''}
+								</Text>
+							) : null}
+							<View style={styles.progressBar}>
+								<View style={[styles.progressFill, { width: progressWidth }]} />
+							</View>
+							<View style={styles.controls}>
+								<TouchableOpacity
+									style={styles.controlButton}
+									accessibilityLabel={isShuffleOn ? 'Disable shuffle' : 'Enable shuffle'}
+									onPress={() => void sendKey(isShuffleOn ? 'SHUFFLE_OFF' : 'SHUFFLE_ON')}
+								>
+									<View style={styles.modeButtonContent}>
+										<MaterialIcons name="shuffle" size={24} color={isShuffleOn ? '#111' : '#666'} />
+										{isShuffleOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
+									</View>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.controlButton}
+									accessibilityLabel="Previous"
+									onPress={() => void sendKey('PREV_TRACK')}
+								>
+									<MaterialIcons name="skip-previous" size={24} color="#111" />
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.controlButton}
+									accessibilityLabel="Play or pause"
+									onPress={() => void sendKey('PLAY_PAUSE')}
+								>
+									<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#111" />
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.controlButton}
+									accessibilityLabel="Next"
+									onPress={() => void sendKey('NEXT_TRACK')}
+								>
+									<View style={styles.modeButtonContent}>
+										<MaterialIcons name="skip-next" size={24} color="#111" />
+										<View style={styles.modeActiveDotSpacer} />
+									</View>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.controlButton}
+									accessibilityLabel={repeatA11yLabel}
+									onPress={() => void sendKey(nextRepeatKey)}
+								>
+									<View style={styles.modeButtonContent}>
+										<MaterialIcons
+											name={repeatIconName}
+											size={24}
+											color={isRepeatOn ? '#111' : '#666'}
+											style={styles.modeIcon}
+										/>
+										{isRepeatOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
+									</View>
+								</TouchableOpacity>
+							</View>
+						</View>
+					) : null}
+				</View>
 			</View>
-		</View>
+			{statusMessage ? (
+				<View style={styles.statusCard}>
+					<Text style={styles.statusTitle}>{statusMessage.title}</Text>
+					<Text style={styles.statusSubtitle}>{statusMessage.subtitle}</Text>
+				</View>
+			) : null}
+		</>
 	);
 }
 
@@ -251,5 +274,25 @@ const styles = StyleSheet.create({
 		width: 4,
 		height: 4,
 		opacity: 0,
+	},
+	statusCard: {
+		marginTop: 12,
+		marginBottom: 12,
+		paddingHorizontal: 16,
+		paddingVertical: 14,
+		borderRadius: 14,
+		backgroundColor: '#fff',
+		borderWidth: 1,
+		borderColor: '#e5e7eb',
+	},
+	statusTitle: {
+		fontSize: 15,
+		fontWeight: '600',
+		color: '#111',
+	},
+	statusSubtitle: {
+		marginTop: 4,
+		fontSize: 13,
+		color: '#666',
 	},
 });

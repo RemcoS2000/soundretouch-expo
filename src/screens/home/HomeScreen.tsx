@@ -34,8 +34,7 @@ export default function HomeScreen() {
 					accessibilityLabel="Manage devices"
 				>
 					<View style={styles.iconWrap}>
-						<MaterialIcons name="speaker-group" size={24} color="black" />
-						<MaterialIcons name="add-circle" size={14} color="#111" style={styles.iconBadge} />
+						<MaterialIcons name="settings" size={24} color="black" />
 					</View>
 				</TouchableOpacity>
 			</View>
@@ -75,14 +74,7 @@ const styles = StyleSheet.create({
 		height: 26,
 		alignItems: 'center',
 		justifyContent: 'center',
-	},
-	iconBadge: {
-		position: 'absolute',
-		right: -2,
-		bottom: -2,
-		backgroundColor: 'rgba(255,255,255,1)',
-		opacity: 1,
-		borderRadius: 8,
+		borderRadius: 13,
 	},
 	carouselWrap: {
 		flex: 1,
