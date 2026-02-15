@@ -4,16 +4,16 @@
 export const getSourceIconName = (source?: string) => {
 	switch (source?.toUpperCase()) {
 		case 'AUX':
-			return 'headset';
+			return 'headset'
 		case 'SPOTIFY':
-			return 'music-note';
+			return 'music-note'
 		case 'TUNEIN':
-			return 'radio';
+			return 'radio'
 		case 'LOCAL_INTERNET_RADIO':
-			return 'language';
+			return 'language'
 		case 'BLUETOOTH':
-			return 'bluetooth';
+			return 'bluetooth'
 		default:
-			return 'audiotrack';
+			return 'audiotrack'
 	}
-};
+}

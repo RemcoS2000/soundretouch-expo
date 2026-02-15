@@ -1,60 +1,62 @@
-import React, { useState, useCallback } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator } from 'react-native';
-import { SoundTouchDevice, type DeviceInfo } from '@soundretouch/api/device';
-import { getSoundtouchProxyUrl } from '../utils/proxy';
-import { useSoundTouchDevices } from '../state/SoundTouchDevicesContext';
+import { type DeviceInfo, SoundTouchDevice } from '@soundretouch/api/device'
+
+import React, { useCallback, useState } from 'react'
+import { ActivityIndicator, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+
+import { useSoundTouchDevices } from '../state/SoundTouchDevicesContext'
+import { getSoundtouchProxyUrl } from '../utils/proxy'
 
 interface AddDeviceManualModalProps {
-	visible: boolean;
-	onClose: () => void;
+	visible: boolean
+	onClose: () => void
 }
 
 export function AddDeviceManualModal({ visible, onClose }: AddDeviceManualModalProps) {
-	const [host, setHost] = useState('');
-	const [state, setState] = useState<'form' | 'loading' | 'success' | 'error'>('form');
-	const [info, setInfo] = useState<DeviceInfo | null>(null);
-	const [device, setDevice] = useState<SoundTouchDevice | null>(null);
-	const canSubmit = host.trim().length > 0;
-	const { addDevice } = useSoundTouchDevices();
+	const [host, setHost] = useState('')
+	const [state, setState] = useState<'form' | 'loading' | 'success' | 'error'>('form')
+	const [info, setInfo] = useState<DeviceInfo | null>(null)
+	const [device, setDevice] = useState<SoundTouchDevice | null>(null)
+	const canSubmit = host.trim().length > 0
+	const { addDevice } = useSoundTouchDevices()
 
 	const handleClose = () => {
-		setHost('');
-		setInfo(null);
-		setDevice(null);
-		setState('form');
-		onClose();
-	};
+		setHost('')
+		setInfo(null)
+		setDevice(null)
+		setState('form')
+		onClose()
+	}
 
 	const handleSubmit = useCallback(async () => {
-		const trimmedHost = host.trim();
-		if (!trimmedHost) return;
-		setState('loading');
-		setInfo(null);
+		const trimmedHost = host.trim()
+		if (!trimmedHost) return
+		setState('loading')
+		setInfo(null)
 		try {
-			const proxyUrl = getSoundtouchProxyUrl();
+			const proxyUrl = getSoundtouchProxyUrl()
 			const instance = new SoundTouchDevice(trimmedHost, {
 				http: proxyUrl ? { proxyUrl, timeoutMs: 20000 } : { timeoutMs: 20000 },
-			});
-			const result = await instance.info();
-			setDevice(instance);
-			setInfo(result);
-			setState('success');
+			})
+			const result = await instance.info()
+			setDevice(instance)
+			setInfo(result)
+			setState('success')
 		} catch {
-			setState('error');
+			setState('error')
 		}
-	}, [host]);
+	}, [host])
 
 	const handleTryAgain = () => {
-		setState('form');
-		setInfo(null);
-		setDevice(null);
-	};
+		setState('form')
+		setInfo(null)
+		setDevice(null)
+	}
 
 	const handleAddSpeaker = () => {
-		if (!device) return;
-		addDevice({ device, info });
-		handleClose();
-	};
+		if (!device) return
+		addDevice({ device, info })
+		handleClose()
+	}
 
 	const renderContent = () => {
 		if (state === 'form') {
@@ -71,18 +73,14 @@ export function AddDeviceManualModal({ visible, onClose }: AddDeviceManualModalP
 						keyboardType="numbers-and-punctuation"
 						style={styles.input}
 					/>
-					<TouchableOpacity
-						style={[styles.primaryButton, !canSubmit && styles.primaryButtonDisabled]}
-						onPress={handleSubmit}
-						disabled={!canSubmit}
-					>
+					<TouchableOpacity style={[styles.primaryButton, !canSubmit && styles.primaryButtonDisabled]} onPress={handleSubmit} disabled={!canSubmit}>
 						<Text style={styles.primaryButtonText}>Look for device</Text>
 					</TouchableOpacity>
 					<TouchableOpacity style={styles.secondaryButton} onPress={handleClose}>
 						<Text style={styles.secondaryButtonText}>Close</Text>
 					</TouchableOpacity>
 				</>
-			);
+			)
 		}
 
 		if (state === 'loading') {
@@ -91,7 +89,7 @@ export function AddDeviceManualModal({ visible, onClose }: AddDeviceManualModalP
 					<ActivityIndicator />
 					<Text style={styles.statusText}>Looking for a speaker...</Text>
 				</View>
-			);
+			)
 		}
 
 		if (state === 'success' && info && device) {
@@ -114,7 +112,7 @@ export function AddDeviceManualModal({ visible, onClose }: AddDeviceManualModalP
 						<Text style={styles.primaryButtonText}>Add speaker</Text>
 					</TouchableOpacity>
 				</View>
-			);
+			)
 		}
 
 		return (
@@ -128,8 +126,8 @@ export function AddDeviceManualModal({ visible, onClose }: AddDeviceManualModalP
 					<Text style={styles.secondaryButtonText}>Edit IP</Text>
 				</TouchableOpacity>
 			</View>
-		);
-	};
+		)
+	}
 
 	return (
 		<Modal animationType="slide" transparent visible={visible} onRequestClose={handleClose}>
@@ -137,7 +135,7 @@ export function AddDeviceManualModal({ visible, onClose }: AddDeviceManualModalP
 				<View style={styles.modalCard}>{renderContent()}</View>
 			</View>
 		</Modal>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -230,4 +228,4 @@ const styles = StyleSheet.create({
 	secondaryButtonText: {
 		color: '#444',
 	},
-});
+})

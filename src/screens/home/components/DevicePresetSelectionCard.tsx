@@ -1,22 +1,24 @@
-import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { Presets, SoundTouchDevice } from '@soundretouch/api/device';
-import { usePresets } from '../../../hooks/usePresets';
-import { getSourceIconName } from '../../../utils';
-import spotifyIcon from '../../../../assets/images/spotify-icon.png';
+import { MaterialIcons } from '@expo/vector-icons'
+import type { Presets, SoundTouchDevice } from '@soundretouch/api/device'
+
+import React from 'react'
+import { Image, StyleSheet, Text, View } from 'react-native'
+
+import spotifyIcon from '../../../../assets/images/spotify-icon.png'
+import { usePresets } from '../../../hooks/usePresets'
+import { getSourceIconName } from '../../../utils'
 
 type DevicePresetSelectionCardProps = {
-	device: SoundTouchDevice;
-};
+	device: SoundTouchDevice
+}
 
 export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardProps) {
-	const { presets } = usePresets(device);
-	const slots: Array<Presets[number]> = Array.from({ length: 6 });
+	const { presets } = usePresets(device)
+	const slots: Array<Presets[number]> = Array.from({ length: 6 })
 	for (const preset of presets) {
-		const id = Number(preset.id);
-		if (!id) continue;
-		slots[id - 1] = preset;
+		const id = Number(preset.id)
+		if (!id) continue
+		slots[id - 1] = preset
 	}
 
 	return (
@@ -24,10 +26,10 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 			<Text style={styles.title}>Presets</Text>
 			<View style={styles.grid}>
 				{slots.map((preset, index) => {
-					const containerArt = (preset?.ContentItem as { containerArt?: unknown } | undefined)?.containerArt;
-					const containerArtUri = typeof containerArt === 'string' && containerArt.trim().length > 0 ? containerArt : null;
-					const isSpotify = (preset?.ContentItem?.source ?? '').toUpperCase().includes('SPOTIFY');
-					const isEmpty = !preset;
+					const containerArt = (preset?.ContentItem as { containerArt?: unknown } | undefined)?.containerArt
+					const containerArtUri = typeof containerArt === 'string' && containerArt.trim().length > 0 ? containerArt : null
+					const isSpotify = (preset?.ContentItem?.source ?? '').toUpperCase().includes('SPOTIFY')
+					const isEmpty = !preset
 
 					return (
 						<View key={`preset-${index + 1}`} style={[styles.square, isEmpty ? styles.squareEmpty : null]}>
@@ -53,11 +55,11 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 								</Text>
 							</View>
 						</View>
-					);
+					)
 				})}
 			</View>
 		</View>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -135,4 +137,4 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		color: '#fff',
 	},
-});
+})

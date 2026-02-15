@@ -1,45 +1,48 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { BottomSheet } from '../../../components/BottomSheet';
-import { DevicePresetSelectionCard } from './DevicePresetSelectionCard';
-import { DeviceSummaryCard } from './DeviceSummaryCard';
-import { DeviceSourceSelectionCard } from './DeviceSourceSelectionCard';
-import { ZoneControlCard } from './ZoneControlCard';
+import { MaterialIcons } from '@expo/vector-icons'
+import type { SoundTouchDevice } from '@soundretouch/api/device'
 
-const FOOTER_HEIGHT = 84;
+import React, { useRef, useState } from 'react'
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+
+import { BottomSheet } from '../../../components/BottomSheet'
+
+import { DevicePresetSelectionCard } from './DevicePresetSelectionCard'
+import { DeviceSourceSelectionCard } from './DeviceSourceSelectionCard'
+import { DeviceSummaryCard } from './DeviceSummaryCard'
+import { ZoneControlCard } from './ZoneControlCard'
+
+const FOOTER_HEIGHT = 84
 
 type DeviceControlBottomSheetProps = {
 	/** Active device for this sheet. When `null`, the component renders nothing. */
-	device: SoundTouchDevice | null;
-};
+	device: SoundTouchDevice | null
+}
 
 export function DeviceControlBottomSheet({ device }: DeviceControlBottomSheetProps) {
 	// BottomSheet requires a concrete container height to calculate open/closed offsets.
-	const { height: screenHeight } = useWindowDimensions();
-	const [activePanel, setActivePanel] = useState<'source' | 'zone'>('source');
-	const toggleRef = useRef<() => void>(() => {});
-	const isExpandedRef = useRef(false);
+	const { height: screenHeight } = useWindowDimensions()
+	const [activePanel, setActivePanel] = useState<'source' | 'zone'>('source')
+	const toggleRef = useRef<() => void>(() => {})
+	const isExpandedRef = useRef(false)
 
 	// Keep home screen clean when no active speaker exists.
-	if (!device) return null;
+	if (!device) return null
 
 	const renderTopContent = ({ isExpanded, toggle }: { isExpanded: boolean; toggle: () => void }) => {
-		toggleRef.current = toggle;
-		isExpandedRef.current = isExpanded;
+		toggleRef.current = toggle
+		isExpandedRef.current = isExpanded
 
 		return (
 			<DeviceSummaryCard
 				device={device}
 				isExpanded={isExpanded}
 				onPress={() => {
-					if (isExpanded) setActivePanel('source');
-					toggle();
+					if (isExpanded) setActivePanel('source')
+					toggle()
 				}}
 			/>
-		);
-	};
+		)
+	}
 
 	return (
 		<BottomSheet footerHeight={FOOTER_HEIGHT} screenHeight={screenHeight} renderTopContent={renderTopContent}>
@@ -69,7 +72,7 @@ export function DeviceControlBottomSheet({ device }: DeviceControlBottomSheetPro
 					<DeviceSourceSelectionCard
 						device={device}
 						onSelected={() => {
-							if (isExpandedRef.current) toggleRef.current();
+							if (isExpandedRef.current) toggleRef.current()
 						}}
 					/>
 				</View>
@@ -77,7 +80,7 @@ export function DeviceControlBottomSheet({ device }: DeviceControlBottomSheetPro
 				<ZoneControlCard device={device} />
 			)}
 		</BottomSheet>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -109,4 +112,4 @@ const styles = StyleSheet.create({
 	sourcePanel: {
 		flex: 1,
 	},
-});
+})

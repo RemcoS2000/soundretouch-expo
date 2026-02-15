@@ -1,59 +1,60 @@
-import { useEffect, useState } from 'react';
-import { AppState } from 'react-native';
-import type { Presets, SoundTouchDevice } from '@soundretouch/api/device';
+import type { Presets, SoundTouchDevice } from '@soundretouch/api/device'
+
+import { useEffect, useState } from 'react'
+import { AppState } from 'react-native'
 
 export const usePresets = (device: SoundTouchDevice | null) => {
-	const [presets, setPresets] = useState<Presets>([]);
-	const visiblePresets = device ? presets : [];
+	const [presets, setPresets] = useState<Presets>([])
+	const visiblePresets = device ? presets : []
 
 	/**
 	 * Loads the initial presets payload, subscribes to updates,
 	 * and refreshes on app resume.
 	 */
 	useEffect(() => {
-		if (!device) return;
+		if (!device) return
 
-		let cancelled = false;
-		let unsubscribe = () => {};
+		let cancelled = false
+		let unsubscribe = () => {}
 
 		const applyPresets = (data: Presets) => {
-			if (cancelled) return;
-			setPresets(data);
-		};
+			if (cancelled) return
+			setPresets(data)
+		}
 
 		const subscribe = () => {
-			unsubscribe();
+			unsubscribe()
 			unsubscribe = device.onPresetsUpdated((data) => {
-				applyPresets(data);
-			});
-		};
+				applyPresets(data)
+			})
+		}
 
 		const load = async () => {
 			try {
-				applyPresets(await device.presets());
+				applyPresets(await device.presets())
 			} catch {
-				applyPresets([]);
+				applyPresets([])
 			}
-		};
+		}
 
-		subscribe();
-		void load();
+		subscribe()
+		void load()
 
 		const appStateSubscription = AppState.addEventListener('change', async (state) => {
 			if (state === 'active') {
-				subscribe();
-				await load();
+				subscribe()
+				await load()
 			}
-		});
+		})
 
 		return () => {
-			cancelled = true;
-			appStateSubscription.remove();
-			unsubscribe();
-		};
-	}, [device]);
+			cancelled = true
+			appStateSubscription.remove()
+			unsubscribe()
+		}
+	}, [device])
 
 	return {
 		presets: visiblePresets,
-	};
-};
+	}
+}

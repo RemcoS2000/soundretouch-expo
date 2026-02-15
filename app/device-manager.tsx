@@ -1,3 +1,3 @@
-import DeviceManagerScreen from '../src/screens/device-manager/DeviceManagerScreen';
+import DeviceManagerScreen from '../src/screens/device-manager/DeviceManagerScreen'
 
-export default DeviceManagerScreen;
+export default DeviceManagerScreen

@@ -1,16 +1,18 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext';
+import { MaterialIcons } from '@expo/vector-icons'
+import type { SoundTouchDevice } from '@soundretouch/api/device'
+
+import React, { useMemo } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext'
 
 type ZoneControlCardProps = {
 	/** Base device whose zone/group we are managing. */
-	device: SoundTouchDevice;
-};
+	device: SoundTouchDevice
+}
 
 export function ZoneControlCard({ device }: ZoneControlCardProps) {
-	const { devices } = useSoundTouchDevices();
+	const { devices } = useSoundTouchDevices()
 	const availableDevices = useMemo(
 		() =>
 			devices
@@ -20,7 +22,7 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 					name: entry.info?.name ?? 'SoundTouch device',
 				})),
 		[devices, device.host]
-	);
+	)
 
 	// TODO: Call SoundTouch zone API to add/remove speakers once available.
 	return (
@@ -57,7 +59,7 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 				<Text style={styles.helperText}>No other speakers available.</Text>
 			)}
 		</View>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -120,4 +122,4 @@ const styles = StyleSheet.create({
 		color: '#888',
 		fontSize: 12,
 	},
-});
+})

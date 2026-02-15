@@ -1,39 +1,41 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useInfo } from '../../../hooks/useInfo';
-import { useNowPlaying } from '../../../hooks/useNowPlaying';
+import { MaterialIcons } from '@expo/vector-icons'
+import type { SoundTouchDevice } from '@soundretouch/api/device'
+
+import React, { useCallback } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { useInfo } from '../../../hooks/useInfo'
+import { useNowPlaying } from '../../../hooks/useNowPlaying'
 
 type DeviceSummaryCardProps = {
 	/** Device shown in the summary row. When `null`, the card renders nothing. */
-	device: SoundTouchDevice | null;
+	device: SoundTouchDevice | null
 	/** Expansion state for subtitle/accessibility text; visual layout stays the same. */
-	isExpanded: boolean;
+	isExpanded: boolean
 	/** Primary press action, usually toggles the bottom sheet open/closed. */
-	onPress: () => void;
-};
+	onPress: () => void
+}
 
 export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummaryCardProps) {
 	// Keep card label in sync with the active device info payload.
-	const { info } = useInfo(device);
-	const { nowPlaying } = useNowPlaying(device);
-	const isPoweredOff = nowPlaying?.source === 'STANDBY';
+	const { info } = useInfo(device)
+	const { nowPlaying } = useNowPlaying(device)
+	const isPoweredOff = nowPlaying?.source === 'STANDBY'
 
 	// Sends a POWER key press/release directly to the active speaker.
 	const handlePower = useCallback(async () => {
-		if (!device) return;
+		if (!device) return
 		try {
-			await device.keyPressAndRelease('POWER');
+			await device.keyPressAndRelease('POWER')
 		} catch {
 			// Ignore control failures for now.
 		}
-	}, [device]);
+	}, [device])
 
 	// Footer is hidden when there is no selected device.
-	if (!device) return null;
+	if (!device) return null
 
-	const deviceName = info?.name;
+	const deviceName = info?.name
 
 	return (
 		<TouchableOpacity
@@ -61,15 +63,15 @@ export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummary
 					accessibilityLabel="Power"
 					onPress={(event) => {
 						// Prevent bubbling so only power action runs.
-						event.stopPropagation();
-						void handlePower();
+						event.stopPropagation()
+						void handlePower()
 					}}
 				>
 					<MaterialIcons name="power-settings-new" size={16} color={isPoweredOff ? '#fff' : '#111'} />
 				</TouchableOpacity>
 			</View>
 		</TouchableOpacity>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -122,4 +124,4 @@ const styles = StyleSheet.create({
 	powerButtonOff: {
 		backgroundColor: '#111',
 	},
-});
+})

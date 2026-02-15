@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext';
-import { HomeBackground } from './components/HomeBackground';
-import { DeviceCarousel } from './components/DeviceCarousel';
-import { DeviceControlBottomSheet } from './components/DeviceControlBottomSheet';
+import { MaterialIcons } from '@expo/vector-icons'
 
-const FOOTER_HEIGHT = 84;
+import { useRouter } from 'expo-router'
+import React, { useState } from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
+
+import { DeviceCarousel } from './components/DeviceCarousel'
+import { DeviceControlBottomSheet } from './components/DeviceControlBottomSheet'
+import { HomeBackground } from './components/HomeBackground'
+
+const FOOTER_HEIGHT = 84
 
 export default function HomeScreen() {
-	const router = useRouter();
-	const { devices } = useSoundTouchDevices();
+	const router = useRouter()
+	const { devices } = useSoundTouchDevices()
 
 	// Track the currently selected carousel page.
-	const [activeIndex, setActiveIndex] = useState(0);
+	const [activeIndex, setActiveIndex] = useState(0)
 
 	// Derive the currently active device from activeIndex.
 	// Most of the screen (now playing card, overlay content, footer actions) depends on this value.
-	const activeDeviceIndex = devices.length === 0 ? 0 : Math.max(0, Math.min(activeIndex, devices.length - 1));
-	const activeDevice = devices[activeDeviceIndex]?.device ?? null;
+	const activeDeviceIndex = devices.length === 0 ? 0 : Math.max(0, Math.min(activeIndex, devices.length - 1))
+	const activeDevice = devices[activeDeviceIndex]?.device ?? null
 
 	return (
 		<View style={styles.container}>
@@ -28,11 +31,7 @@ export default function HomeScreen() {
 			{/* Header Section: app title + device manager entry point */}
 			<View style={styles.header}>
 				<Text style={styles.title}>SoundReTouch</Text>
-				<TouchableOpacity
-					onPress={() => router.push('/device-manager')}
-					accessibilityRole="button"
-					accessibilityLabel="Manage devices"
-				>
+				<TouchableOpacity onPress={() => router.push('/device-manager')} accessibilityRole="button" accessibilityLabel="Manage devices">
 					<View style={styles.iconWrap}>
 						<MaterialIcons name="settings" size={24} color="black" />
 					</View>
@@ -47,7 +46,7 @@ export default function HomeScreen() {
 				<DeviceControlBottomSheet key={activeDevice?.host ?? 'no-device'} device={activeDevice} />
 			</View>
 		</View>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -81,4 +80,4 @@ const styles = StyleSheet.create({
 		paddingBottom: 0,
 		position: 'relative',
 	},
-});
+})

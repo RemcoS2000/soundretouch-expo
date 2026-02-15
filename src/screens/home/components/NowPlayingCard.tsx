@@ -1,63 +1,62 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, type DimensionValue } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useNowPlaying } from '../../../hooks/useNowPlaying';
+import { MaterialIcons } from '@expo/vector-icons'
+import type { SoundTouchDevice } from '@soundretouch/api/device'
+
+import React, { useCallback } from 'react'
+import { type DimensionValue, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { useNowPlaying } from '../../../hooks/useNowPlaying'
 
 type NowPlayingCardProps = {
 	/** Device instance used for now-playing polling/subscription and media key actions. */
-	device: SoundTouchDevice;
-};
+	device: SoundTouchDevice
+}
 
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
-	const { nowPlaying, artUrl } = useNowPlaying(device);
+	const { nowPlaying, artUrl } = useNowPlaying(device)
 
 	// Extract nowPlaying details
-	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || '';
-	const artist = nowPlaying?.artist || '';
-	const album = nowPlaying?.album;
-	const source = nowPlaying?.source ?? null;
-	const shuffleSetting = nowPlaying?.shuffleSetting ?? '';
-	const repeatSetting = nowPlaying?.repeatSetting ?? '';
+	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''
+	const artist = nowPlaying?.artist || ''
+	const album = nowPlaying?.album
+	const source = nowPlaying?.source ?? null
+	const shuffleSetting = nowPlaying?.shuffleSetting ?? ''
+	const repeatSetting = nowPlaying?.repeatSetting ?? ''
 
 	// Derive common state booleans for visual and interaction logic.
-	const hasNowPlaying = Boolean(nowPlaying);
-	const isPlaying = nowPlaying?.playStatus === 'PLAY_STATE';
-	const isShuffleOn = shuffleSetting === 'SHUFFLE_ON';
-	const isRepeatOn = repeatSetting === 'REPEAT_ALL' || repeatSetting === 'REPEAT_ONE';
-	const isStandby = source === 'STANDBY';
-	const isInvalidSource = source === 'INVALID_SOURCE';
-	const isAux = source === 'AUX';
-	const hidePlaybackContent = isStandby || isInvalidSource || isAux;
+	const hasNowPlaying = Boolean(nowPlaying)
+	const isPlaying = nowPlaying?.playStatus === 'PLAY_STATE'
+	const isShuffleOn = shuffleSetting === 'SHUFFLE_ON'
+	const isRepeatOn = repeatSetting === 'REPEAT_ALL' || repeatSetting === 'REPEAT_ONE'
+	const isStandby = source === 'STANDBY'
+	const isInvalidSource = source === 'INVALID_SOURCE'
+	const isAux = source === 'AUX'
+	const hidePlaybackContent = isStandby || isInvalidSource || isAux
 
-	const repeatIconName = repeatSetting === 'REPEAT_ONE' ? 'repeat-one' : 'repeat';
-	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF';
-	const repeatA11yLabel =
-		repeatSetting === 'REPEAT_OFF' ? 'Enable repeat all' : repeatSetting === 'REPEAT_ALL' ? 'Switch to repeat one' : 'Disable repeat';
+	const repeatIconName = repeatSetting === 'REPEAT_ONE' ? 'repeat-one' : 'repeat'
+	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF'
+	const repeatA11yLabel = repeatSetting === 'REPEAT_OFF' ? 'Enable repeat all' : repeatSetting === 'REPEAT_ALL' ? 'Switch to repeat one' : 'Disable repeat'
 
 	// Use raw device-provided playback time.
-	const displaySeconds = nowPlaying?.time?.['#text'] ?? 0;
-	const totalTime = nowPlaying?.time?.total ?? 0;
-	const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0;
-	const progressWidth = `${(progress * 100).toFixed(2)}%` as DimensionValue;
+	const displaySeconds = nowPlaying?.time?.['#text'] ?? 0
+	const totalTime = nowPlaying?.time?.total ?? 0
+	const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0
+	const progressWidth = `${(progress * 100).toFixed(2)}%` as DimensionValue
 
 	// Transport key actions are delegated to the SoundTouch device API.
 	const sendKey = useCallback(
-		async (
-			key: 'PLAY_PAUSE' | 'PREV_TRACK' | 'NEXT_TRACK' | 'SHUFFLE_ON' | 'SHUFFLE_OFF' | 'REPEAT_ALL' | 'REPEAT_ONE' | 'REPEAT_OFF'
-		) => {
+		async (key: 'PLAY_PAUSE' | 'PREV_TRACK' | 'NEXT_TRACK' | 'SHUFFLE_ON' | 'SHUFFLE_OFF' | 'REPEAT_ALL' | 'REPEAT_ONE' | 'REPEAT_OFF') => {
 			try {
-				await device.keyPressAndRelease(key);
+				await device.keyPressAndRelease(key)
 			} catch {
 				// Ignore control failures for now.
 			}
 		},
 		[device]
-	);
+	)
 
-	const showArtwork = !hidePlaybackContent && Boolean(artUrl);
-	const showPlayback = !hidePlaybackContent && hasNowPlaying;
+	const showArtwork = !hidePlaybackContent && Boolean(artUrl)
+	const showPlayback = !hidePlaybackContent && hasNowPlaying
 	const statusMessage = isInvalidSource
 		? {
 				title: 'No source selected',
@@ -68,7 +67,7 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 					title: 'Device is stand by',
 					subtitle: 'Use the power button below to turn it on.',
 				}
-			: null;
+			: null
 
 	return (
 		<>
@@ -112,42 +111,21 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 										{isShuffleOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
 									</View>
 								</TouchableOpacity>
-								<TouchableOpacity
-									style={styles.controlButton}
-									accessibilityLabel="Previous"
-									onPress={() => void sendKey('PREV_TRACK')}
-								>
+								<TouchableOpacity style={styles.controlButton} accessibilityLabel="Previous" onPress={() => void sendKey('PREV_TRACK')}>
 									<MaterialIcons name="skip-previous" size={24} color="#111" />
 								</TouchableOpacity>
-								<TouchableOpacity
-									style={styles.controlButton}
-									accessibilityLabel="Play or pause"
-									onPress={() => void sendKey('PLAY_PAUSE')}
-								>
+								<TouchableOpacity style={styles.controlButton} accessibilityLabel="Play or pause" onPress={() => void sendKey('PLAY_PAUSE')}>
 									<MaterialIcons name={isPlaying ? 'pause' : 'play-arrow'} size={28} color="#111" />
 								</TouchableOpacity>
-								<TouchableOpacity
-									style={styles.controlButton}
-									accessibilityLabel="Next"
-									onPress={() => void sendKey('NEXT_TRACK')}
-								>
+								<TouchableOpacity style={styles.controlButton} accessibilityLabel="Next" onPress={() => void sendKey('NEXT_TRACK')}>
 									<View style={styles.modeButtonContent}>
 										<MaterialIcons name="skip-next" size={24} color="#111" />
 										<View style={styles.modeActiveDotSpacer} />
 									</View>
 								</TouchableOpacity>
-								<TouchableOpacity
-									style={styles.controlButton}
-									accessibilityLabel={repeatA11yLabel}
-									onPress={() => void sendKey(nextRepeatKey)}
-								>
+								<TouchableOpacity style={styles.controlButton} accessibilityLabel={repeatA11yLabel} onPress={() => void sendKey(nextRepeatKey)}>
 									<View style={styles.modeButtonContent}>
-										<MaterialIcons
-											name={repeatIconName}
-											size={24}
-											color={isRepeatOn ? '#111' : '#666'}
-											style={styles.modeIcon}
-										/>
+										<MaterialIcons name={repeatIconName} size={24} color={isRepeatOn ? '#111' : '#666'} style={styles.modeIcon} />
 										{isRepeatOn ? <View style={styles.modeActiveDot} /> : <View style={styles.modeActiveDotSpacer} />}
 									</View>
 								</TouchableOpacity>
@@ -163,7 +141,7 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 				</View>
 			) : null}
 		</>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -295,4 +273,4 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		color: '#666',
 	},
-});
+})

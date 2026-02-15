@@ -1,14 +1,16 @@
-import React, { useMemo, useState } from 'react';
-import { Alert, Platform, ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { AddDeviceManualModal } from '../../modals/AddDeviceManualModal';
-import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext';
+import { MaterialIcons } from '@expo/vector-icons'
+
+import { useRouter } from 'expo-router'
+import React, { useMemo, useState } from 'react'
+import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { AddDeviceManualModal } from '../../modals/AddDeviceManualModal'
+import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
 export default function DeviceManagerScreen() {
-	const [manualVisible, setManualVisible] = useState(false);
-	const router = useRouter();
-	const { devices, removeDevice } = useSoundTouchDevices();
+	const [manualVisible, setManualVisible] = useState(false)
+	const router = useRouter()
+	const { devices, removeDevice } = useSoundTouchDevices()
 
 	// Normalize device entries for rendering.
 	const deviceList = useMemo(
@@ -18,22 +20,22 @@ export default function DeviceManagerScreen() {
 				name: entry.info?.name ?? 'SoundTouch device',
 			})),
 		[devices]
-	);
+	)
 
 	// Confirm removal; Alert buttons don't work on web.
 	const confirmRemove = (host: string, name: string) => {
 		if (Platform.OS === 'web') {
-			const confirmed = window.confirm(`Remove ${name} from this app?`);
+			const confirmed = window.confirm(`Remove ${name} from this app?`)
 			if (confirmed) {
-				removeDevice(host);
+				removeDevice(host)
 			}
-			return;
+			return
 		}
 		Alert.alert('Remove speaker?', `Remove ${name} from this app?`, [
 			{ text: 'Cancel', style: 'cancel' },
 			{ text: 'Remove', style: 'destructive', onPress: () => removeDevice(host) },
-		]);
-	};
+		])
+	}
 
 	return (
 		<View style={styles.container}>
@@ -61,10 +63,7 @@ export default function DeviceManagerScreen() {
 										<Text style={styles.listHost}>{item.host}</Text>
 									</View>
 								</View>
-								<TouchableOpacity
-									onPress={() => confirmRemove(item.host, item.name)}
-									accessibilityLabel={`Remove ${item.name}`}
-								>
+								<TouchableOpacity onPress={() => confirmRemove(item.host, item.name)} accessibilityLabel={`Remove ${item.name}`}>
 									<MaterialIcons name="close" size={20} color="#666" />
 								</TouchableOpacity>
 							</View>
@@ -99,7 +98,7 @@ export default function DeviceManagerScreen() {
 			</ScrollView>
 			<AddDeviceManualModal visible={manualVisible} onClose={() => setManualVisible(false)} />
 		</View>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -219,4 +218,4 @@ const styles = StyleSheet.create({
 		color: '#777',
 		fontWeight: '600',
 	},
-});
+})

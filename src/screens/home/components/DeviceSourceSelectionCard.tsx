@@ -1,20 +1,22 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import type { SoundTouchDevice } from '@soundretouch/api/device';
-import { useNowPlaying } from '../../../hooks/useNowPlaying';
-import { useSources } from '../../../hooks/useSources';
-import { getSourceIconName } from '../../../utils';
+import { MaterialIcons } from '@expo/vector-icons'
+import type { SoundTouchDevice } from '@soundretouch/api/device'
+
+import React from 'react'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { useNowPlaying } from '../../../hooks/useNowPlaying'
+import { useSources } from '../../../hooks/useSources'
+import { getSourceIconName } from '../../../utils'
 
 type DeviceSourceSelectionCardProps = {
-	device: SoundTouchDevice;
-	onSelected?: () => void;
-};
+	device: SoundTouchDevice
+	onSelected?: () => void
+}
 
 export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSelectionCardProps) {
-	const { sourceItems, select } = useSources(device);
-	const { nowPlaying } = useNowPlaying(device);
-	const currentSource = nowPlaying?.source ?? null;
+	const { sourceItems, select } = useSources(device)
+	const { nowPlaying } = useNowPlaying(device)
+	const currentSource = nowPlaying?.source ?? null
 
 	return (
 		<View style={styles.container}>
@@ -23,20 +25,20 @@ export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSe
 				<ScrollView style={styles.listScroll} showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never">
 					<View style={styles.list}>
 						{sourceItems.map((item, index) => {
-							const key = `${item.source ?? 'unknown'}:${item.sourceAccount ?? ''}:${index}`;
-							const isCurrent = currentSource === item.source;
+							const key = `${item.source ?? 'unknown'}:${item.sourceAccount ?? ''}:${index}`
+							const isCurrent = currentSource === item.source
 
 							return (
 								<TouchableOpacity
 									key={key}
 									style={[styles.row, isCurrent ? styles.rowCurrent : null]}
 									onPress={() => {
-										if (isCurrent) return;
-										if (!item.source) return;
+										if (isCurrent) return
+										if (!item.source) return
 										void (async () => {
-											await select(item);
-											onSelected?.();
-										})();
+											await select(item)
+											onSelected?.()
+										})()
 									}}
 									disabled={!item.source || isCurrent}
 									accessibilityRole="button"
@@ -46,14 +48,12 @@ export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSe
 										<MaterialIcons name={getSourceIconName(item.source)} size={18} color="#111" />
 									</View>
 									<View style={styles.rowLabelWrap}>
-										<Text style={styles.rowTitle}>
-											{item['#text']?.trim() || item.sourceAccount || item.source || ''}
-										</Text>
+										<Text style={styles.rowTitle}>{item['#text']?.trim() || item.sourceAccount || item.source || ''}</Text>
 										{item.source ? <Text style={styles.rowMeta}>{item.source}</Text> : null}
 									</View>
 									{isCurrent ? <Text style={styles.currentText}>Current</Text> : null}
 								</TouchableOpacity>
-							);
+							)
 						})}
 					</View>
 				</ScrollView>
@@ -61,7 +61,7 @@ export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSe
 				<Text style={styles.emptyText}>No sources available.</Text>
 			)}
 		</View>
-	);
+	)
 }
 
 const styles = StyleSheet.create({
@@ -125,4 +125,4 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		color: '#666',
 	},
-});
+})
