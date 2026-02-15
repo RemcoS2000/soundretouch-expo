@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Animated, type GestureResponderEvent, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
+import { useSettings } from '../state/SettingsContext'
+
 type BottomSheetProps = {
 	/** Visible height (px) of the collapsed state (the summary/footer row). */
 	footerHeight: number
@@ -10,6 +12,8 @@ type BottomSheetProps = {
 	renderTopContent: (args: { isExpanded: boolean; toggle: () => void }) => React.ReactNode
 	/** Main expanded content shown inside the sheet scroll area. */
 	children: React.ReactNode
+	/** Optional expansion state listener for parent UI coordination. */
+	onExpandedChange?: (isExpanded: boolean) => void
 }
 
 const DRAG_OPEN_PROGRESS_THRESHOLD = 0.5
@@ -20,7 +24,8 @@ const MAX_SPRING_VELOCITY = 3.5
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value))
 
-export function BottomSheet({ footerHeight, screenHeight, renderTopContent, children }: BottomSheetProps) {
+export function BottomSheet({ footerHeight, screenHeight, renderTopContent, children, onExpandedChange }: BottomSheetProps) {
+	const { colors } = useSettings()
 	const [isExpanded, setIsExpanded] = useState(false)
 	const [isVisible, setIsVisible] = useState(false)
 	const [overlayHeight, setOverlayHeight] = useState(0)
@@ -51,6 +56,10 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 			progress.removeListener(id)
 		}
 	}, [progress])
+
+	useEffect(() => {
+		onExpandedChange?.(isExpanded)
+	}, [isExpanded, onExpandedChange])
 
 	const animateProgressTo = useCallback(
 		(toValue: 0 | 1, velocity = 0, onFinished?: () => void) => {
@@ -192,7 +201,7 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 			{isVisible && <Pressable style={styles.backdrop} onPress={() => close(0)} accessibilityRole="button" accessibilityLabel="Close speaker settings" />}
 
 			<Animated.View pointerEvents="box-none" style={styles.overlay}>
-				<Animated.View style={[styles.panel, { transform: [{ translateY }] }]}>
+				<Animated.View style={[styles.panel, { backgroundColor: colors.surfaceElevated, transform: [{ translateY }] }]}>
 					{isVisible && (
 						<Animated.View
 							style={[

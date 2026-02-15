@@ -5,6 +5,7 @@ import React, { useRef, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 
 import { BottomSheet } from '../../../components/BottomSheet'
+import { useSettings } from '../../../state/SettingsContext'
 
 import { DevicePresetSelectionCard } from './DevicePresetSelectionCard'
 import { DeviceSourceSelectionCard } from './DeviceSourceSelectionCard'
@@ -16,11 +17,14 @@ const FOOTER_HEIGHT = 84
 type DeviceControlBottomSheetProps = {
 	/** Active device for this sheet. When `null`, the component renders nothing. */
 	device: SoundTouchDevice | null
+	/** Notifies parent when the bottom sheet is expanded/collapsed. */
+	onExpandedChange?: (isExpanded: boolean) => void
 }
 
-export function DeviceControlBottomSheet({ device }: DeviceControlBottomSheetProps) {
+export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceControlBottomSheetProps) {
 	// BottomSheet requires a concrete container height to calculate open/closed offsets.
 	const { height: screenHeight } = useWindowDimensions()
+	const { colors } = useSettings()
 	const [activePanel, setActivePanel] = useState<'source' | 'zone'>('source')
 	const toggleRef = useRef<() => void>(() => {})
 	const isExpandedRef = useRef(false)
@@ -45,25 +49,25 @@ export function DeviceControlBottomSheet({ device }: DeviceControlBottomSheetPro
 	}
 
 	return (
-		<BottomSheet footerHeight={FOOTER_HEIGHT} screenHeight={screenHeight} renderTopContent={renderTopContent}>
+		<BottomSheet footerHeight={FOOTER_HEIGHT} screenHeight={screenHeight} renderTopContent={renderTopContent} onExpandedChange={onExpandedChange}>
 			<View style={styles.panelButtonRow}>
 				<TouchableOpacity
-					style={[styles.panelButton, activePanel === 'source' ? styles.panelButtonActive : null]}
+					style={[styles.panelButton, { backgroundColor: activePanel === 'source' ? colors.surfaceActive : colors.surface }]}
 					accessibilityRole="button"
 					accessibilityLabel="Source input"
 					onPress={() => setActivePanel('source')}
 				>
-					<MaterialIcons name="input" size={16} color="#111" />
-					<Text style={styles.panelButtonText}>Source input</Text>
+					<MaterialIcons name="input" size={16} color={colors.icon} />
+					<Text style={[styles.panelButtonText, { color: colors.text }]}>Source input</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
-					style={[styles.panelButton, activePanel === 'zone' ? styles.panelButtonActive : null]}
+					style={[styles.panelButton, { backgroundColor: activePanel === 'zone' ? colors.surfaceActive : colors.surface }]}
 					accessibilityRole="button"
 					accessibilityLabel="Zone control"
 					onPress={() => setActivePanel('zone')}
 				>
-					<MaterialIcons name="speaker-group" size={16} color="#111" />
-					<Text style={styles.panelButtonText}>Zone control</Text>
+					<MaterialIcons name="speaker-group" size={16} color={colors.icon} />
+					<Text style={[styles.panelButtonText, { color: colors.text }]}>Zone control</Text>
 				</TouchableOpacity>
 			</View>
 			{activePanel === 'source' ? (
@@ -101,13 +105,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 	},
-	panelButtonActive: {
-		backgroundColor: '#e5e7eb',
-	},
 	panelButtonText: {
 		fontSize: 13,
 		fontWeight: '600',
-		color: '#111',
 	},
 	sourcePanel: {
 		flex: 1,

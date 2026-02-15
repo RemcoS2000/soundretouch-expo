@@ -2,22 +2,26 @@ import { MaterialIcons } from '@expo/vector-icons'
 
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
+import { AppBackground } from '../../components/AppBackground'
+import { useSettings } from '../../state/SettingsContext'
 import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
 import { DeviceCarousel } from './components/DeviceCarousel'
 import { DeviceControlBottomSheet } from './components/DeviceControlBottomSheet'
-import { HomeBackground } from './components/HomeBackground'
+import { HomeHeaderCard } from './components/HomeHeaderCard'
 
 const FOOTER_HEIGHT = 84
 
 export default function HomeScreen() {
 	const router = useRouter()
 	const { devices } = useSoundTouchDevices()
+	const { colors } = useSettings()
 
 	// Track the currently selected carousel page.
 	const [activeIndex, setActiveIndex] = useState(0)
+	const [isSheetExpanded, setIsSheetExpanded] = useState(false)
 
 	// Derive the currently active device from activeIndex.
 	// Most of the screen (now playing card, overlay content, footer actions) depends on this value.
@@ -25,17 +29,24 @@ export default function HomeScreen() {
 	const activeDevice = devices[activeDeviceIndex]?.device ?? null
 
 	return (
-		<View style={styles.container}>
-			<HomeBackground device={activeDevice} />
+		<View style={[styles.container, { backgroundColor: colors.background }]}>
+			<AppBackground device={activeDevice} />
 
 			{/* Header Section: app title + device manager entry point */}
 			<View style={styles.header}>
-				<Text style={styles.title}>SoundReTouch</Text>
-				<TouchableOpacity onPress={() => router.push('/device-manager')} accessibilityRole="button" accessibilityLabel="Manage devices">
-					<View style={styles.iconWrap}>
-						<MaterialIcons name="settings" size={24} color="black" />
-					</View>
-				</TouchableOpacity>
+				<HomeHeaderCard device={activeDevice} isExpanded={isSheetExpanded} />
+				<View style={styles.headerActions}>
+					<TouchableOpacity onPress={() => router.push('/device-manager')} accessibilityRole="button" accessibilityLabel="Manage devices">
+						<View style={styles.iconWrap}>
+							<MaterialIcons name="speaker-group" size={24} color={colors.icon} />
+						</View>
+					</TouchableOpacity>
+					<TouchableOpacity onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Open settings">
+						<View style={styles.iconWrap}>
+							<MaterialIcons name="settings" size={24} color={colors.icon} />
+						</View>
+					</TouchableOpacity>
+				</View>
 			</View>
 
 			{/* Main Content Section: horizontal now-playing carousel + sliding device overlay */}
@@ -43,7 +54,7 @@ export default function HomeScreen() {
 				<DeviceCarousel devices={devices} footerHeight={FOOTER_HEIGHT} onActiveIndexChange={(index) => setActiveIndex(index)} />
 
 				{/* Overlay Section: device controls/settings panel that slides over the carousel */}
-				<DeviceControlBottomSheet key={activeDevice?.host ?? 'no-device'} device={activeDevice} />
+				<DeviceControlBottomSheet key={activeDevice?.host ?? 'no-device'} device={activeDevice} onExpandedChange={setIsSheetExpanded} />
 			</View>
 		</View>
 	)
@@ -54,7 +65,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingTop: 60,
 		paddingBottom: 0,
-		backgroundColor: '#f3f4f6',
 		overflow: 'hidden',
 	},
 	header: {
@@ -64,9 +74,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		marginBottom: 16,
 	},
-	title: {
-		fontSize: 28,
-		fontWeight: '700',
+	headerActions: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 12,
 	},
 	iconWrap: {
 		width: 26,
