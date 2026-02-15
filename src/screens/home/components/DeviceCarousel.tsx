@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { FlatList, ListRenderItem, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 import type { SoundTouchDeviceEntry } from '../../../state/SoundTouchDevicesContext'
 
 import { NowPlayingCard } from './NowPlayingCard'
@@ -20,7 +20,7 @@ type DeviceCarouselProps = {
 export function DeviceCarousel({ devices, footerHeight, onActiveIndexChange }: DeviceCarouselProps) {
 	// Each carousel page fills the viewport width.
 	const { width: pageWidth } = useWindowDimensions()
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 
 	// Render one full-width page containing a single NowPlaying card.
 	const renderItem: ListRenderItem<SoundTouchDeviceEntry> = ({ item }) => (

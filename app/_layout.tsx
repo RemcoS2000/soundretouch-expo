@@ -1,14 +1,14 @@
 import { Stack } from 'expo-router'
 
-import { SettingsProvider } from '../src/state/SettingsContext'
+import { AppSettingsProvider } from '../src/state/AppSettingsContext'
 import { SoundTouchDevicesProvider } from '../src/state/SoundTouchDevicesContext'
 
 export default function RootLayout() {
 	return (
-		<SettingsProvider>
+		<AppSettingsProvider>
 			<SoundTouchDevicesProvider>
 				<Stack screenOptions={{ headerShown: false }} />
 			</SoundTouchDevicesProvider>
-		</SettingsProvider>
+		</AppSettingsProvider>
 	)
 }

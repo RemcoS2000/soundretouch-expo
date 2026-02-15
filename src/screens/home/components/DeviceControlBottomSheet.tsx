@@ -5,7 +5,7 @@ import React, { useRef, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 
 import { BottomSheet } from '../../../components/BottomSheet'
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 
 import { DevicePresetSelectionCard } from './DevicePresetSelectionCard'
 import { DeviceSourceSelectionCard } from './DeviceSourceSelectionCard'
@@ -24,7 +24,7 @@ type DeviceControlBottomSheetProps = {
 export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceControlBottomSheetProps) {
 	// BottomSheet requires a concrete container height to calculate open/closed offsets.
 	const { height: screenHeight } = useWindowDimensions()
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const [activePanel, setActivePanel] = useState<'source' | 'zone'>('source')
 	const toggleRef = useRef<() => void>(() => {})
 	const isExpandedRef = useRef(false)

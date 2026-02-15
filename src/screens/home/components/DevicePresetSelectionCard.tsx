@@ -6,7 +6,7 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 
 import spotifyIcon from '../../../../assets/images/spotify-icon.png'
 import { usePresets } from '../../../hooks/usePresets'
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
 type DevicePresetSelectionCardProps = {
@@ -15,7 +15,7 @@ type DevicePresetSelectionCardProps = {
 
 export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardProps) {
 	const { presets } = usePresets(device)
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const slots: Array<Presets[number]> = Array.from({ length: 6 })
 	for (const preset of presets) {
 		const id = Number(preset.id)

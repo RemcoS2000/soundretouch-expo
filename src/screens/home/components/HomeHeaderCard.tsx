@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { Animated, Image, StyleSheet, Text, View } from 'react-native'
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
 type HomeHeaderCardProps = {
@@ -14,7 +14,7 @@ type HomeHeaderCardProps = {
 }
 
 export function HomeHeaderCard({ device, isExpanded }: HomeHeaderCardProps) {
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const { nowPlaying, artUrl } = useNowPlaying(device)
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''
 	const artist = nowPlaying?.artist || ''

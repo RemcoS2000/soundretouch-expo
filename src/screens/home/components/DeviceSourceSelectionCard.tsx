@@ -6,7 +6,7 @@ import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'r
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
 import { useSources } from '../../../hooks/useSources'
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
 type DeviceSourceSelectionCardProps = {
@@ -17,7 +17,7 @@ type DeviceSourceSelectionCardProps = {
 export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSelectionCardProps) {
 	const { sourceItems, select } = useSources(device)
 	const { nowPlaying } = useNowPlaying(device)
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const currentSource = nowPlaying?.source ?? null
 
 	const openSourceApp = async (source?: string) => {

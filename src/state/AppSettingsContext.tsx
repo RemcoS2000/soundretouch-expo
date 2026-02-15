@@ -8,16 +8,16 @@ const STORAGE_KEY = 'soundretouch:theme-mode'
 
 type SettingsMode = 'light' | 'dark'
 
-type SettingsContextValue = {
+type AppSettingsContextValue = {
 	mode: SettingsMode
 	isDarkMode: boolean
 	colors: ThemeColors
 	toggleDarkMode: () => void
 }
 
-const SettingsContext = createContext<SettingsContextValue | null>(null)
+const AppSettingsContext = createContext<AppSettingsContextValue | null>(null)
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
+export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
 	const [mode, setMode] = useState<SettingsMode>('light')
 
 	useEffect(() => {
@@ -51,13 +51,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 		[mode, toggleDarkMode]
 	)
 
-	return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>
+	return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>
 }
 
-export function useSettings() {
-	const context = useContext(SettingsContext)
+export function useAppSettings() {
+	const context = useContext(AppSettingsContext)
 	if (!context) {
-		throw new Error('useSettings must be used within SettingsProvider')
+		throw new Error('useAppSettings must be used within AppSettingsProvider')
 	}
 	return context
 }

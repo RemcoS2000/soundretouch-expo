@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Animated, type GestureResponderEvent, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
-import { useSettings } from '../state/SettingsContext'
+import { useAppSettings } from '../state/AppSettingsContext'
 
 type BottomSheetProps = {
 	/** Visible height (px) of the collapsed state (the summary/footer row). */
@@ -25,7 +25,7 @@ const MAX_SPRING_VELOCITY = 3.5
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value))
 
 export function BottomSheet({ footerHeight, screenHeight, renderTopContent, children, onExpandedChange }: BottomSheetProps) {
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const [isExpanded, setIsExpanded] = useState(false)
 	const [isVisible, setIsVisible] = useState(false)
 	const [overlayHeight, setOverlayHeight] = useState(0)

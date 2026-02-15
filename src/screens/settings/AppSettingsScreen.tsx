@@ -3,17 +3,17 @@ import React from 'react'
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native'
 
 import { AppBackground } from '../../components/AppBackground'
-import { useSettings } from '../../state/SettingsContext'
+import { useAppSettings } from '../../state/AppSettingsContext'
 
-export default function SettingsScreen() {
+export default function AppSettingsScreen() {
 	const router = useRouter()
-	const { isDarkMode, colors, toggleDarkMode } = useSettings()
+	const { isDarkMode, colors, toggleDarkMode } = useAppSettings()
 
 	return (
 		<View style={[styles.container, { backgroundColor: colors.background }]}>
 			<AppBackground device={null} />
 			<View style={styles.headerRow}>
-				<Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
+				<Text style={[styles.headerTitle, { color: colors.text }]}>AppSettings</Text>
 				<TouchableOpacity onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Close settings">
 					<Text style={[styles.closeText, { color: colors.text }]}>Close</Text>
 				</TouchableOpacity>

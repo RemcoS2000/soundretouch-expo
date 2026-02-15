@@ -6,14 +6,14 @@ import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View }
 
 import { AppBackground } from '../../components/AppBackground'
 import { AddDeviceManualModal } from '../../modals/AddDeviceManualModal'
-import { useSettings } from '../../state/SettingsContext'
+import { useAppSettings } from '../../state/AppSettingsContext'
 import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
 export default function DeviceManagerScreen() {
 	const [manualVisible, setManualVisible] = useState(false)
 	const router = useRouter()
 	const { devices, removeDevice } = useSoundTouchDevices()
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 
 	// Normalize device entries for rendering.
 	const deviceList = useMemo(

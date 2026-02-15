@@ -5,7 +5,7 @@ import React, { useCallback } from 'react'
 import { type DimensionValue, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 
 type NowPlayingCardProps = {
 	/** Device instance used for now-playing polling/subscription and media key actions. */
@@ -15,7 +15,7 @@ type NowPlayingCardProps = {
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
 	const { nowPlaying, artUrl } = useNowPlaying(device)
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 
 	// Extract nowPlaying details
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''

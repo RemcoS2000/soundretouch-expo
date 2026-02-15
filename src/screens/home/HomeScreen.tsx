@@ -5,7 +5,7 @@ import React, { useState } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 import { AppBackground } from '../../components/AppBackground'
-import { useSettings } from '../../state/SettingsContext'
+import { useAppSettings } from '../../state/AppSettingsContext'
 import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
 import { DeviceCarousel } from './components/DeviceCarousel'
@@ -17,7 +17,7 @@ const FOOTER_HEIGHT = 84
 export default function HomeScreen() {
 	const router = useRouter()
 	const { devices } = useSoundTouchDevices()
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 
 	// Track the currently selected carousel page.
 	const [activeIndex, setActiveIndex] = useState(0)
@@ -41,7 +41,7 @@ export default function HomeScreen() {
 							<MaterialIcons name="speaker-group" size={24} color={colors.icon} />
 						</View>
 					</TouchableOpacity>
-					<TouchableOpacity onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Open settings">
+					<TouchableOpacity onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Open app settings">
 						<View style={styles.iconWrap}>
 							<MaterialIcons name="settings" size={24} color={colors.icon} />
 						</View>

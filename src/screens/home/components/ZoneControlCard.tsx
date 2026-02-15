@@ -4,7 +4,7 @@ import type { SoundTouchDevice } from '@soundretouch/api/device'
 import React, { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext'
 
 type ZoneControlCardProps = {
@@ -14,7 +14,7 @@ type ZoneControlCardProps = {
 
 export function ZoneControlCard({ device }: ZoneControlCardProps) {
 	const { devices } = useSoundTouchDevices()
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const availableDevices = useMemo(
 		() =>
 			devices

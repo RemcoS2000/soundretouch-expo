@@ -6,7 +6,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useInfo } from '../../../hooks/useInfo'
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
-import { useSettings } from '../../../state/SettingsContext'
+import { useAppSettings } from '../../../state/AppSettingsContext'
 
 type DeviceSummaryCardProps = {
 	/** Device shown in the summary row. When `null`, the card renders nothing. */
@@ -21,7 +21,7 @@ export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummary
 	// Keep card label in sync with the active device info payload.
 	const { info } = useInfo(device)
 	const { nowPlaying } = useNowPlaying(device)
-	const { colors } = useSettings()
+	const { colors } = useAppSettings()
 	const isPoweredOff = nowPlaying?.source === 'STANDBY'
 
 	// Sends a POWER key press/release directly to the active speaker.
