@@ -1,19 +1,28 @@
 {
 	"name": "soundretouched",
 	"version": "1.0.0",
-	"main": "index.ts",
 	"private": true,
 	"type": "module",
+	"main": "index.ts",
 	"scripts": {
-		"start": "expo start",
 		"android": "expo start --android",
-		"ios": "expo start --ios",
-		"web": "expo start --web",
-		"proxy": "tsx proxy/server.ts",
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
 		"format": "prettier --write .",
-		"prepare": "husky"
+		"ios": "expo start --ios",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+		"prepare": "husky",
+		"proxy": "tsx proxy/server.ts",
+		"start": "expo start",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"web": "expo start --web"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,jsx}": [
+			"eslint --fix",
+			"prettier --write"
+		],
+		"*.{json,yml,yaml,md}": [
+			"prettier --write"
+		]
 	},
 	"dependencies": {
 		"@expo/vector-icons": "^15.0.3",
@@ -39,6 +48,7 @@
 	"devDependencies": {
 		"@commitlint/cli": "^20.2.0",
 		"@commitlint/config-conventional": "^20.2.0",
+		"@trivago/prettier-plugin-sort-imports": "^6.0.2",
 		"@types/express": "^5.0.3",
 		"@types/react": "~19.1.0",
 		"@types/react-native-zeroconf": "^0.13.1",
@@ -53,17 +63,9 @@
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.7",
 		"prettier": "^3.7.4",
+		"prettier-plugin-packagejson": "^3.0.0",
 		"tsx": "^4.20.5",
 		"typescript": "~5.9.2",
 		"typescript-eslint": "^8.48.1"
-	},
-	"lint-staged": {
-		"*.{ts,tsx,js,jsx}": [
-			"eslint --fix",
-			"prettier --write"
-		],
-		"*.{json,yml,yaml,md}": [
-			"prettier --write"
-		]
 	}
 }
