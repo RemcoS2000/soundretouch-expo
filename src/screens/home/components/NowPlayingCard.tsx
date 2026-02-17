@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import type { SoundTouchDevice } from '@soundretouch/api/device'
 
 import React, { useCallback } from 'react'
-import { type DimensionValue, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
 import { useAppSettings } from '../../../state/AppSettingsContext'
@@ -15,7 +15,7 @@ type NowPlayingCardProps = {
 
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
-	const { nowPlaying, artUrl } = useNowPlaying(device)
+	const { artUrl, nowPlaying, nowPlayingProgress } = useNowPlaying(device)
 	const { colors } = useAppSettings()
 
 	// Extract nowPlaying details
@@ -40,11 +40,8 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF'
 	const repeatA11yLabel = repeatSetting === 'REPEAT_OFF' ? 'Enable repeat all' : repeatSetting === 'REPEAT_ALL' ? 'Switch to repeat one' : 'Disable repeat'
 
-	// Use raw device-provided playback time.
-	const displaySeconds = nowPlaying?.time?.['#text'] ?? 0
-	const totalTime = nowPlaying?.time?.total ?? 0
-	const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0
-	const progressWidth = `${(progress * 100).toFixed(2)}%` as DimensionValue
+	// Interpolated progress from hook.
+	const { progressWidth } = nowPlayingProgress
 
 	// Transport key actions are delegated to the SoundTouch device API.
 	const sendKey = useCallback(
