@@ -1,20 +1,23 @@
 import { MaterialIcons } from '@expo/vector-icons'
-import type { Presets, SoundTouchDevice } from '@soundretouch/api/device'
+import type { PresetId, Presets, SoundTouchDevice } from '@soundretouch/api/device'
 
 import React from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import spotifyIcon from '../../../../assets/images/spotify-icon.png'
 import { usePresets } from '../../../hooks/usePresets'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
+const PRESET_IDS: PresetId[] = [1, 2, 3, 4, 5, 6]
+
 type DevicePresetSelectionCardProps = {
 	device: SoundTouchDevice
+	onSelected?: () => void
 }
 
-export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardProps) {
-	const { presets } = usePresets(device)
+export function DevicePresetSelectionCard({ device, onSelected }: DevicePresetSelectionCardProps) {
+	const { presets, selectPreset } = usePresets(device)
 	const { colors } = useAppSettings()
 	const slots: Array<Presets[number]> = Array.from({ length: 6 })
 	for (const preset of presets) {
@@ -34,7 +37,20 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 					const isEmpty = !preset
 
 					return (
-						<View key={`preset-${index + 1}`} style={[styles.square, { backgroundColor: colors.surface }, isEmpty ? styles.squareEmpty : null]}>
+						<TouchableOpacity
+							key={`preset-${index + 1}`}
+							style={[styles.square, { backgroundColor: colors.surface }, isEmpty ? styles.squareEmpty : null]}
+							disabled={isEmpty}
+							onPress={() => {
+								if (!preset) return
+								void (async () => {
+									await selectPreset(PRESET_IDS[index])
+									onSelected?.()
+								})()
+							}}
+							accessibilityRole="button"
+							accessibilityLabel={preset?.ContentItem?.itemName ? `Select preset ${preset.ContentItem.itemName}` : `Select preset ${index + 1}`}
+						>
 							{containerArtUri ? (
 								<Image source={{ uri: containerArtUri }} style={styles.art} />
 							) : isSpotify ? (
@@ -54,6 +70,9 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 								</View>
 							)}
 							<View style={[styles.overlay, isEmpty ? styles.overlayEmpty : null]}>
+								<View style={styles.presetNumberWrap}>
+									<Text style={styles.presetNumber}>{index + 1}</Text>
+								</View>
 								{preset?.ContentItem?.source ? (
 									<View style={styles.sourceIconWrap}>
 										<MaterialIcons name={getSourceIconName(preset.ContentItem.source)} size={14} color="#fff" />
@@ -63,7 +82,7 @@ export function DevicePresetSelectionCard({ device }: DevicePresetSelectionCardP
 									{preset?.ContentItem?.itemName ?? ''}
 								</Text>
 							</View>
-						</View>
+						</TouchableOpacity>
 					)
 				})}
 			</View>
@@ -137,6 +156,23 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(0,0,0,0.45)',
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	presetNumberWrap: {
+		position: 'absolute',
+		top: 8,
+		left: 8,
+		minWidth: 20,
+		height: 20,
+		paddingHorizontal: 6,
+		borderRadius: 10,
+		backgroundColor: 'rgba(0,0,0,0.45)',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	presetNumber: {
+		fontSize: 11,
+		fontWeight: '700',
+		color: '#fff',
 	},
 	overlayEmpty: {
 		backgroundColor: 'rgba(0,0,0,0.06)',

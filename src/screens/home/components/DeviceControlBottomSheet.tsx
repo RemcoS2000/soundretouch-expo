@@ -72,7 +72,12 @@ export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceCon
 			</View>
 			{activePanel === 'source' ? (
 				<View style={styles.sourcePanel}>
-					<DevicePresetSelectionCard device={device} />
+					<DevicePresetSelectionCard
+						device={device}
+						onSelected={() => {
+							if (isExpandedRef.current) toggleRef.current()
+						}}
+					/>
 					<DeviceSourceSelectionCard
 						device={device}
 						onSelected={() => {

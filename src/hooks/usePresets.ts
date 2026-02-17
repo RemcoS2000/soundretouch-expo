@@ -1,11 +1,21 @@
-import type { Presets, SoundTouchDevice } from '@soundretouch/api/device'
+import type { KeyValue, PresetId, Presets, SoundTouchDevice } from '@soundretouch/api/device'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AppState } from 'react-native'
+
+type PresetKey = Extract<KeyValue, `PRESET_${PresetId}`>
 
 export const usePresets = (device: SoundTouchDevice | null) => {
 	const [presets, setPresets] = useState<Presets>([])
 	const visiblePresets = device ? presets : []
+
+	const selectPreset = useCallback(
+		async (presetId: PresetId) => {
+			if (!device) return
+			await device.keyPressAndRelease(`PRESET_${presetId}` as PresetKey)
+		},
+		[device]
+	)
 
 	/**
 	 * Loads the initial presets payload, subscribes to updates,
@@ -56,5 +66,6 @@ export const usePresets = (device: SoundTouchDevice | null) => {
 
 	return {
 		presets: visiblePresets,
+		selectPreset,
 	}
 }
