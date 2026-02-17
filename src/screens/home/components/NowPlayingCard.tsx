@@ -15,7 +15,7 @@ type NowPlayingCardProps = {
 
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
-	const { artUrl, nowPlaying, nowPlayingProgress } = useNowPlaying(device)
+	const { nowPlaying, nowPlayingProgress } = useNowPlaying(device)
 	const { colors } = useAppSettings()
 
 	// Extract nowPlaying details
@@ -23,6 +23,7 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	const artist = nowPlaying?.artist || ''
 	const album = nowPlaying?.album
 	const source = nowPlaying?.source ?? null
+	const artUrl = nowPlaying?.art?.['#text']
 	const shuffleSetting = nowPlaying?.shuffleSetting ?? ''
 	const repeatSetting = nowPlaying?.repeatSetting ?? ''
 

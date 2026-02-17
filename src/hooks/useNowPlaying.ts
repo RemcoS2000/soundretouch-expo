@@ -14,7 +14,6 @@ export const useNowPlaying = (device: SoundTouchDevice | null) => {
 		progressWidth: '0.00%',
 	})
 	const visibleNowPlaying = device ? nowPlaying : null
-	const artUrl = visibleNowPlaying?.art?.['#text']
 
 	/**
 	 * Loads the initial now playing payload, subscribes to updates,
@@ -97,7 +96,6 @@ export const useNowPlaying = (device: SoundTouchDevice | null) => {
 	}, [isPlaying, totalTime])
 
 	return {
-		artUrl,
 		nowPlaying: visibleNowPlaying,
 		nowPlayingProgress,
 	}

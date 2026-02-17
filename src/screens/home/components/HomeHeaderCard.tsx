@@ -15,9 +15,13 @@ type HomeHeaderCardProps = {
 
 export function HomeHeaderCard({ device, isExpanded }: HomeHeaderCardProps) {
 	const { colors } = useAppSettings()
-	const { nowPlaying, artUrl } = useNowPlaying(device)
+	const { nowPlaying } = useNowPlaying(device)
+
+	// Extract nowPlaying details
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''
 	const artist = nowPlaying?.artist || ''
+	const artUrl = nowPlaying?.art?.['#text']
+
 	const showMiniNowPlaying = isExpanded && Boolean(title || artist)
 	const [progress] = useState(() => new Animated.Value(showMiniNowPlaying ? 1 : 0))
 
