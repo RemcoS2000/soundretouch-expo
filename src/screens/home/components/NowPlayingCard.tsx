@@ -6,6 +6,7 @@ import { type DimensionValue, Image, StyleSheet, Text, TouchableOpacity, View } 
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
 import { useAppSettings } from '../../../state/AppSettingsContext'
+import { getSourceIconName } from '../../../utils'
 
 type NowPlayingCardProps = {
 	/** Device instance used for now-playing polling/subscription and media key actions. */
@@ -86,7 +87,16 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 						) : null}
 					</View>
 
-					{showArtwork ? <Image source={{ uri: artUrl }} style={[styles.artwork, { backgroundColor: colors.artworkFallback }]} /> : null}
+					{showPlayback ? (
+						<View style={styles.artworkFrame}>
+							{showArtwork ? <Image source={{ uri: artUrl }} style={[styles.artwork, { backgroundColor: colors.artworkFallback }]} /> : null}
+							{!showArtwork ? (
+								<View style={[styles.artwork, styles.artworkPlaceholder, { backgroundColor: colors.artworkFallback }]}>
+									<MaterialIcons name={getSourceIconName(source ?? undefined)} size={56} color={colors.icon} />
+								</View>
+							) : null}
+						</View>
+					) : null}
 
 					{showPlayback ? (
 						<View style={styles.playbackMeta}>
@@ -159,11 +169,9 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 const styles = StyleSheet.create({
 	cardFull: {
 		flex: 1,
-		borderRadius: 24,
 	},
 	nowPlayingCard: {
 		flex: 1,
-		padding: 0,
 		borderRadius: 12,
 		position: 'relative',
 	},
@@ -184,11 +192,9 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		letterSpacing: 0.5,
 		textTransform: 'uppercase',
-		color: '#666',
 		textAlign: 'center',
 	},
 	sourcePill: {
-		backgroundColor: '#111',
 		borderRadius: 10,
 		paddingHorizontal: 8,
 		paddingVertical: 2,
@@ -202,33 +208,35 @@ const styles = StyleSheet.create({
 		width: '100%',
 		aspectRatio: 1,
 		borderRadius: 12,
-		backgroundColor: '#e5e7eb',
+	},
+	artworkFrame: {
+		position: 'relative',
+	},
+	artworkPlaceholder: {
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	trackTitle: {
 		fontSize: 16,
 		fontWeight: '700',
 		lineHeight: 22,
-		color: '#111',
 		paddingTop: 0,
 		textAlign: 'left',
 	},
 	trackMeta: {
 		marginTop: 4,
 		lineHeight: 18,
-		color: '#666',
 		textAlign: 'left',
 	},
 	progressBar: {
 		marginTop: 12,
 		height: 6,
 		borderRadius: 999,
-		backgroundColor: '#e5e7eb',
 		overflow: 'hidden',
 	},
 	progressFill: {
 		height: '100%',
 		width: '0%',
-		backgroundColor: '#111',
 	},
 	controls: {
 		marginTop: 12,
@@ -257,7 +265,6 @@ const styles = StyleSheet.create({
 		width: 4,
 		height: 4,
 		borderRadius: 2,
-		backgroundColor: '#111',
 	},
 	modeActiveDotSpacer: {
 		marginTop: 2,
@@ -271,18 +278,14 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 14,
 		borderRadius: 14,
-		backgroundColor: '#fff',
 		borderWidth: 1,
-		borderColor: '#e5e7eb',
 	},
 	statusTitle: {
 		fontSize: 15,
 		fontWeight: '600',
-		color: '#111',
 	},
 	statusSubtitle: {
 		marginTop: 4,
 		fontSize: 13,
-		color: '#666',
 	},
 })
