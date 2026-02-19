@@ -8,12 +8,12 @@ import { useNowPlaying } from '../../../hooks/useNowPlaying'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
-type HomeHeaderCardProps = {
+type HomeHeaderProps = {
 	device: SoundTouchDevice | null
 	isExpanded: boolean
 }
 
-export function HomeHeaderCard({ device, isExpanded }: HomeHeaderCardProps) {
+export function HomeHeader({ device, isExpanded }: HomeHeaderProps) {
 	const { colors } = useAppSettings()
 	const { nowPlaying } = useNowPlaying(device)
 

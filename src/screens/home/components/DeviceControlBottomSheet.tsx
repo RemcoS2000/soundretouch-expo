@@ -7,10 +7,10 @@ import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'r
 import { BottomSheet } from '../../../components/BottomSheet'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 
-import { DevicePresetSelectionCard } from './DevicePresetSelectionCard'
-import { DeviceSourceSelectionCard } from './DeviceSourceSelectionCard'
-import { DeviceSummaryCard } from './DeviceSummaryCard'
-import { ZoneControlCard } from './ZoneControlCard'
+import { DevicePresetSelection } from './DevicePresetSelection'
+import { DeviceSourceSelection } from './DeviceSourceSelection'
+import { DeviceSummary } from './DeviceSummary'
+import { ZoneControl } from './ZoneControl'
 
 const FOOTER_HEIGHT = 84
 
@@ -37,7 +37,7 @@ export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceCon
 		isExpandedRef.current = isExpanded
 
 		return (
-			<DeviceSummaryCard
+			<DeviceSummary
 				device={device}
 				isExpanded={isExpanded}
 				onPress={() => {
@@ -72,13 +72,13 @@ export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceCon
 			</View>
 			{activePanel === 'source' ? (
 				<View style={styles.sourcePanel}>
-					<DevicePresetSelectionCard
+					<DevicePresetSelection
 						device={device}
 						onSelected={() => {
 							if (isExpandedRef.current) toggleRef.current()
 						}}
 					/>
-					<DeviceSourceSelectionCard
+					<DeviceSourceSelection
 						device={device}
 						onSelected={() => {
 							if (isExpandedRef.current) toggleRef.current()
@@ -86,7 +86,7 @@ export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceCon
 					/>
 				</View>
 			) : (
-				<ZoneControlCard device={device} />
+				<ZoneControl device={device} />
 			)}
 		</BottomSheet>
 	)

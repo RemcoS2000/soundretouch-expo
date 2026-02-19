@@ -9,12 +9,12 @@ import { useSources } from '../../../hooks/useSources'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
-type DeviceSourceSelectionCardProps = {
+type DeviceSourceSelectionProps = {
 	device: SoundTouchDevice
 	onSelected?: () => void
 }
 
-export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSelectionCardProps) {
+export function DeviceSourceSelection({ device, onSelected }: DeviceSourceSelectionProps) {
 	const { sourceItems, select } = useSources(device)
 	const { nowPlaying } = useNowPlaying(device)
 	const { colors } = useAppSettings()

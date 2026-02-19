@@ -8,7 +8,7 @@ import { useInfo } from '../../../hooks/useInfo'
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 
-type DeviceSummaryCardProps = {
+type DeviceSummaryProps = {
 	/** Device shown in the summary row. When `null`, the card renders nothing. */
 	device: SoundTouchDevice | null
 	/** Expansion state for subtitle/accessibility text; visual layout stays the same. */
@@ -17,7 +17,7 @@ type DeviceSummaryCardProps = {
 	onPress: () => void
 }
 
-export function DeviceSummaryCard({ device, isExpanded, onPress }: DeviceSummaryCardProps) {
+export function DeviceSummary({ device, isExpanded, onPress }: DeviceSummaryProps) {
 	// Keep card label in sync with the active device info payload.
 	const { info } = useInfo(device)
 	const { nowPlaying } = useNowPlaying(device)

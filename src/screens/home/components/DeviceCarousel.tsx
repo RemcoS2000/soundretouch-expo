@@ -4,7 +4,7 @@ import { FlatList, ListRenderItem, StyleSheet, Text, useWindowDimensions, View }
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import type { SoundTouchDeviceEntry } from '../../../state/SoundTouchDevicesContext'
 
-import { NowPlayingCard } from './NowPlayingCard'
+import { NowPlaying } from './NowPlaying'
 
 type ScrollEvent = { nativeEvent: { contentOffset: { x: number } } }
 
@@ -25,7 +25,7 @@ export function DeviceCarousel({ devices, footerHeight, onActiveIndexChange }: D
 	// Render one full-width page containing a single NowPlaying card.
 	const renderItem: ListRenderItem<SoundTouchDeviceEntry> = ({ item }) => (
 		<View style={[styles.page, { width: pageWidth }]}>
-			<NowPlayingCard device={item.device} />
+			<NowPlaying device={item.device} />
 		</View>
 	)
 

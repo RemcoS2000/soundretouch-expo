@@ -7,12 +7,12 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { useSoundTouchDevices } from '../../../state/SoundTouchDevicesContext'
 
-type ZoneControlCardProps = {
+type ZoneControlProps = {
 	/** Base device whose zone/group we are managing. */
 	device: SoundTouchDevice
 }
 
-export function ZoneControlCard({ device }: ZoneControlCardProps) {
+export function ZoneControl({ device }: ZoneControlProps) {
 	const { devices } = useSoundTouchDevices()
 	const { colors } = useAppSettings()
 	const availableDevices = useMemo(

@@ -10,7 +10,7 @@ import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
 import { DeviceCarousel } from './components/DeviceCarousel'
 import { DeviceControlBottomSheet } from './components/DeviceControlBottomSheet'
-import { HomeHeaderCard } from './components/HomeHeaderCard'
+import { HomeHeader } from './components/HomeHeader'
 
 const FOOTER_HEIGHT = 84
 
@@ -34,7 +34,7 @@ export default function HomeScreen() {
 
 			{/* Header Section: app title + device manager entry point */}
 			<View style={styles.header}>
-				<HomeHeaderCard device={activeDevice} isExpanded={isSheetExpanded} />
+				<HomeHeader device={activeDevice} isExpanded={isSheetExpanded} />
 				<View style={styles.headerActions}>
 					<TouchableOpacity onPress={() => router.push('/device-manager')} accessibilityRole="button" accessibilityLabel="Manage devices">
 						<View style={styles.iconWrap}>

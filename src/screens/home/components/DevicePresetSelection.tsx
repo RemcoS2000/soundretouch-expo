@@ -11,12 +11,12 @@ import { getSourceIconName } from '../../../utils'
 
 const PRESET_IDS: PresetId[] = [1, 2, 3, 4, 5, 6]
 
-type DevicePresetSelectionCardProps = {
+type DevicePresetSelectionProps = {
 	device: SoundTouchDevice
 	onSelected?: () => void
 }
 
-export function DevicePresetSelectionCard({ device, onSelected }: DevicePresetSelectionCardProps) {
+export function DevicePresetSelection({ device, onSelected }: DevicePresetSelectionProps) {
 	const { presets, selectPreset } = usePresets(device)
 	const { colors } = useAppSettings()
 	const slots: Array<Presets[number]> = Array.from({ length: 6 })

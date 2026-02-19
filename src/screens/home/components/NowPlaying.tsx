@@ -9,12 +9,12 @@ import { useNowPlayingProgressBar } from '../../../hooks/useNowPlayingProgressBa
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
-type NowPlayingCardProps = {
+type NowPlayingProps = {
 	/** Device instance used for now-playing polling/subscription and media key actions. */
 	device: SoundTouchDevice
 }
 
-export function NowPlayingCard({ device }: NowPlayingCardProps) {
+export function NowPlaying({ device }: NowPlayingProps) {
 	// Live device state: metadata, playback state, and artwork URL.
 	const { nowPlaying } = useNowPlaying(device)
 	const { colors } = useAppSettings()
