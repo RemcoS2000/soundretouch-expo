@@ -28,16 +28,22 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 
 	// TODO: Call SoundTouch zone API to add/remove speakers once available.
 	return (
-		<View style={[styles.card, { backgroundColor: colors.surfaceElevated }]}>
-			<View style={styles.header}>
-				<View style={styles.headerRow}>
-					<MaterialIcons name="speaker-group" size={18} color={colors.icon} />
-					<View>
-						<Text style={[styles.title, { color: colors.text }]}>Zone control</Text>
-						<Text style={[styles.subtitle, { color: colors.textMuted }]}>Add a speaker to this group.</Text>
-					</View>
-				</View>
-			</View>
+		<View style={styles.container}>
+			<TouchableOpacity
+				style={[styles.playEverywhereButton, { backgroundColor: colors.surfaceMuted, borderColor: colors.border }]}
+				accessibilityLabel="Play everywhere"
+				onPress={() => {
+					// TODO: Call zone API to group all available speakers.
+				}}
+			>
+				<MaterialIcons name="speaker-group" size={24} color={colors.icon} />
+				<Text style={[styles.playEverywhereText, { color: colors.text }]}>Play everywhere</Text>
+			</TouchableOpacity>
+
+			<View style={[styles.separator, { backgroundColor: colors.border }]} />
+
+			<Text style={[styles.title, { color: colors.textMuted }]}>Add speakers manually</Text>
+
 			{availableDevices.length > 0 ? (
 				<View style={styles.list}>
 					{availableDevices.map((item) => (
@@ -65,29 +71,33 @@ export function ZoneControlCard({ device }: ZoneControlCardProps) {
 }
 
 const styles = StyleSheet.create({
-	card: {
+	container: {
 		marginTop: 12,
-		padding: 16,
-		borderRadius: 16,
-		backgroundColor: '#fff',
-		boxShadow: '0px 6px 16px rgba(0,0,0,0.08)',
-	},
-	header: {
-		marginBottom: 12,
+		paddingHorizontal: 2,
 	},
 	title: {
-		fontSize: 16,
+		marginBottom: 10,
+		fontSize: 12,
 		fontWeight: '700',
-		color: '#111',
+		letterSpacing: 0.5,
+		textTransform: 'uppercase',
 	},
-	headerRow: {
+	playEverywhereButton: {
+		height: 56,
+		borderRadius: 14,
+		borderWidth: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 8,
+		justifyContent: 'center',
+		gap: 10,
 	},
-	subtitle: {
-		marginTop: 4,
-		color: '#666',
+	playEverywhereText: {
+		fontSize: 16,
+		fontWeight: '700',
+	},
+	separator: {
+		height: 1,
+		marginVertical: 14,
 	},
 	list: {
 		gap: 10,
@@ -105,11 +115,6 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: '600',
 		color: '#111',
-	},
-	listSubtitle: {
-		marginTop: 4,
-		color: '#777',
-		fontSize: 12,
 	},
 	addButton: {
 		width: 28,
