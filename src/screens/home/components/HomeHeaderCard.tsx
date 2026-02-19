@@ -20,7 +20,7 @@ export function HomeHeaderCard({ device, isExpanded }: HomeHeaderCardProps) {
 	// Extract nowPlaying details
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''
 	const artist = nowPlaying?.artist || ''
-	const artUrl = nowPlaying?.art?.['#text']
+	const artUrl = nowPlaying?.art?.url
 
 	const showMiniNowPlaying = isExpanded && Boolean(title || artist)
 	const [progress] = useState(() => new Animated.Value(showMiniNowPlaying ? 1 : 0))

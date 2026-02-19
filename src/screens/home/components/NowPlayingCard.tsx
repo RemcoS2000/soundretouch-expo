@@ -23,7 +23,7 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	const artist = nowPlaying?.artist || ''
 	const album = nowPlaying?.album
 	const source = nowPlaying?.source ?? null
-	const artUrl = nowPlaying?.art?.['#text']
+	const artUrl = nowPlaying?.art?.url
 	const shuffleSetting = nowPlaying?.shuffleSetting ?? ''
 	const repeatSetting = nowPlaying?.repeatSetting ?? ''
 

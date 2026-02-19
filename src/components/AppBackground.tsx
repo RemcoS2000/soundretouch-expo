@@ -18,7 +18,7 @@ export function AppBackground({ device }: AppBackgroundProps) {
 	const { nowPlaying } = useNowPlaying(device)
 	const { colors } = useAppSettings()
 	const [opacity] = useState(() => new Animated.Value(MAX_OPACITY))
-	const artUrl = nowPlaying?.art?.['#text']
+	const artUrl = nowPlaying?.art?.url
 	const imageSource = artUrl ? { uri: artUrl } : defaultBackgroundImage
 
 	useEffect(() => {

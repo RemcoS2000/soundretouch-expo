@@ -41,6 +41,7 @@ export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSe
 							const key = `${item.source ?? 'unknown'}:${item.sourceAccount ?? ''}:${index}`
 							const isCurrent = currentSource === item.source
 							const canOpenApp = item.source === 'SPOTIFY'
+							const label = item.name?.trim() || String(item.sourceAccount ?? item.source ?? '')
 
 							return (
 								<TouchableOpacity
@@ -56,15 +57,13 @@ export function DeviceSourceSelectionCard({ device, onSelected }: DeviceSourceSe
 									}}
 									disabled={!item.source || isCurrent}
 									accessibilityRole="button"
-									accessibilityLabel={`Select ${item['#text']?.trim() || item.sourceAccount || item.source || ''}`}
+									accessibilityLabel={`Select ${label}`}
 								>
 									<View style={styles.iconWrap}>
 										<MaterialIcons name={getSourceIconName(item.source)} size={18} color={colors.icon} />
 									</View>
 									<View style={styles.rowLabelWrap}>
-										<Text style={[styles.rowTitle, { color: colors.text }]}>
-											{item['#text']?.trim() || item.sourceAccount || item.source || ''}
-										</Text>
+										<Text style={[styles.rowTitle, { color: colors.text }]}>{label}</Text>
 										{item.source ? <Text style={[styles.rowMeta, { color: colors.textMuted }]}>{item.source}</Text> : null}
 									</View>
 									<View style={styles.rowRightActions}>

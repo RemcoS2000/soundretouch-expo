@@ -28,7 +28,7 @@ export const useNowPlaying = (device: SoundTouchDevice | null) => {
 		const applyNowPlaying = (data: NowPlaying | null) => {
 			if (cancelled) return
 			setNowPlaying(data)
-			const displaySeconds = Number(data?.time?.['#text'] ?? 0) || 0
+			const displaySeconds = Number(data?.time?.elapsed ?? 0) || 0
 			const totalTime = Number(data?.time?.total ?? 0) || 0
 			const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0
 			setNowPlayingProgress({
