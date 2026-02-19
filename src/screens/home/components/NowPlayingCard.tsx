@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
+import { useNowPlayingProgressBar } from '../../../hooks/useNowPlayingProgressBar'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
@@ -15,13 +16,16 @@ type NowPlayingCardProps = {
 
 export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	// Live device state: metadata, playback state, and artwork URL.
-	const { nowPlaying, nowPlayingProgress } = useNowPlaying(device)
+	const { nowPlaying } = useNowPlaying(device)
 	const { colors } = useAppSettings()
+	const { canSeek, displayProgressWidth, onProgressBarLayout, seekResponderProps } = useNowPlayingProgressBar(device)
 
 	// Extract nowPlaying details
 	const title = nowPlaying?.track || nowPlaying?.ContentItem?.itemName || ''
 	const artist = nowPlaying?.artist || ''
 	const album = nowPlaying?.album
+	const trackMeta = [artist, album].filter(Boolean).join(' • ')
+
 	const source = nowPlaying?.source ?? null
 	const artUrl = nowPlaying?.art?.url
 	const shuffleSetting = nowPlaying?.shuffleSetting ?? ''
@@ -40,9 +44,6 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 	const repeatIconName = repeatSetting === 'REPEAT_ONE' ? 'repeat-one' : 'repeat'
 	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF'
 	const repeatA11yLabel = repeatSetting === 'REPEAT_OFF' ? 'Enable repeat all' : repeatSetting === 'REPEAT_ALL' ? 'Switch to repeat one' : 'Disable repeat'
-
-	// Interpolated progress from hook.
-	const { progressWidth } = nowPlayingProgress
 
 	// Transport key actions are delegated to the SoundTouch device API.
 	const sendKey = useCallback(
@@ -87,12 +88,13 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 
 					{showPlayback ? (
 						<View style={styles.artworkFrame}>
-							{showArtwork ? <Image source={{ uri: artUrl }} style={[styles.artwork, { backgroundColor: colors.artworkFallback }]} /> : null}
-							{!showArtwork ? (
+							{showArtwork ? (
+								<Image source={{ uri: artUrl }} style={[styles.artwork, { backgroundColor: colors.artworkFallback }]} />
+							) : (
 								<View style={[styles.artwork, styles.artworkPlaceholder, { backgroundColor: colors.artworkFallback }]}>
 									<MaterialIcons name={getSourceIconName(source ?? undefined)} size={56} color={colors.icon} />
 								</View>
-							) : null}
+							)}
 						</View>
 					) : null}
 
@@ -103,14 +105,21 @@ export function NowPlayingCard({ device }: NowPlayingCardProps) {
 									{title}
 								</Text>
 							) : null}
-							{artist || album ? (
+							{trackMeta ? (
 								<Text style={[styles.trackMeta, { color: colors.textMuted }]} numberOfLines={1} ellipsizeMode="tail">
-									{artist}
-									{album ? ` • ${album}` : ''}
+									{trackMeta}
 								</Text>
 							) : null}
-							<View style={[styles.progressBar, { backgroundColor: colors.progressTrack }]}>
-								<View style={[styles.progressFill, { backgroundColor: colors.progressFill, width: progressWidth }]} />
+							<View
+								onLayout={onProgressBarLayout}
+								{...seekResponderProps}
+								accessible
+								accessibilityRole="button"
+								accessibilityLabel={canSeek ? 'Seek playback position' : 'Seek not supported for this source'}
+								style={[styles.progressBar, { backgroundColor: colors.progressTrack }]}
+							>
+								<View style={[styles.progressFill, { backgroundColor: colors.progressFill, width: displayProgressWidth }]} />
+								{canSeek ? <View style={[styles.seekThumb, { backgroundColor: colors.progressFill, left: displayProgressWidth }]} /> : null}
 							</View>
 							<View style={styles.controls}>
 								<TouchableOpacity
@@ -230,11 +239,20 @@ const styles = StyleSheet.create({
 		marginTop: 12,
 		height: 6,
 		borderRadius: 999,
-		overflow: 'hidden',
+		overflow: 'visible',
 	},
 	progressFill: {
 		height: '100%',
 		width: '0%',
+	},
+	seekThumb: {
+		position: 'absolute',
+		top: '50%',
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		marginTop: -5,
+		marginLeft: -5,
 	},
 	controls: {
 		marginTop: 12,

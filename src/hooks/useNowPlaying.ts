@@ -3,16 +3,8 @@ import type { NowPlaying, SoundTouchDevice } from '@soundretouch/api/device'
 import { useEffect, useState } from 'react'
 import { AppState } from 'react-native'
 
-import type { NowPlayingProgress } from '../types/NowPlayingProgress'
-
 export const useNowPlaying = (device: SoundTouchDevice | null) => {
 	const [nowPlaying, setNowPlaying] = useState<NowPlaying | null>(null)
-	const [nowPlayingProgress, setNowPlayingProgress] = useState<NowPlayingProgress>({
-		displaySeconds: 0,
-		totalTime: 0,
-		progress: 0,
-		progressWidth: '0.00%',
-	})
 	const visibleNowPlaying = device ? nowPlaying : null
 
 	/**
@@ -28,15 +20,6 @@ export const useNowPlaying = (device: SoundTouchDevice | null) => {
 		const applyNowPlaying = (data: NowPlaying | null) => {
 			if (cancelled) return
 			setNowPlaying(data)
-			const displaySeconds = Number(data?.time?.elapsed ?? 0) || 0
-			const totalTime = Number(data?.time?.total ?? 0) || 0
-			const progress = totalTime ? Math.min(1, displaySeconds / totalTime) : 0
-			setNowPlayingProgress({
-				displaySeconds,
-				totalTime,
-				progress,
-				progressWidth: `${(progress * 100).toFixed(2)}%`,
-			})
 		}
 
 		const subscribe = () => {
@@ -70,33 +53,7 @@ export const useNowPlaying = (device: SoundTouchDevice | null) => {
 		}
 	}, [device])
 
-	/*
-	 * The device only reports play time at coarse intervals, so we keep an interpolated
-	 * progress state for smoother UI progress between updates.
-	 */
-	const totalTime = Number(visibleNowPlaying?.time?.total ?? 0) || 0
-	const isPlaying = visibleNowPlaying?.playStatus === 'PLAY_STATE'
-
-	useEffect(() => {
-		if (!isPlaying) return
-		const step = 0.25
-		const intervalId = setInterval(() => {
-			setNowPlayingProgress((current) => {
-				const nextDisplaySeconds = totalTime ? Math.min(totalTime, current.displaySeconds + step) : current.displaySeconds + step
-				const progress = totalTime ? Math.min(1, nextDisplaySeconds / totalTime) : 0
-				return {
-					displaySeconds: nextDisplaySeconds,
-					totalTime,
-					progress,
-					progressWidth: `${(progress * 100).toFixed(2)}%`,
-				}
-			})
-		}, step * 1000)
-		return () => clearInterval(intervalId)
-	}, [isPlaying, totalTime])
-
 	return {
 		nowPlaying: visibleNowPlaying,
-		nowPlayingProgress,
 	}
 }
