@@ -10,6 +10,7 @@ import { useAppSettings } from '../../../state/AppSettingsContext'
 import { DevicePresetSelection } from './DevicePresetSelection'
 import { DeviceSourceSelection } from './DeviceSourceSelection'
 import { DeviceSummary } from './DeviceSummary'
+import { VolumeSlider } from './VolumeSlider'
 import { ZoneControl } from './ZoneControl'
 
 const FOOTER_HEIGHT = 84
@@ -50,6 +51,9 @@ export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceCon
 
 	return (
 		<BottomSheet footerHeight={FOOTER_HEIGHT} screenHeight={screenHeight} renderTopContent={renderTopContent} onExpandedChange={onExpandedChange}>
+			<View style={styles.volumeWrap}>
+				<VolumeSlider device={device} />
+			</View>
 			<View style={styles.panelButtonRow}>
 				<TouchableOpacity
 					style={[styles.panelButton, { backgroundColor: activePanel === 'source' ? colors.surfaceActive : colors.surface }]}
@@ -93,6 +97,9 @@ export function DeviceControlBottomSheet({ device, onExpandedChange }: DeviceCon
 }
 
 const styles = StyleSheet.create({
+	volumeWrap: {
+		marginBottom: 8,
+	},
 	panelButtonRow: {
 		marginTop: 2,
 		marginBottom: -4,
