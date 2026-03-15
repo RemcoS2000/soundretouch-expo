@@ -6,6 +6,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
 import { useNowPlayingProgressBar } from '../../../hooks/useNowPlayingProgressBar'
+import { useZone } from '../../../hooks/useZone'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 import { getSourceIconName } from '../../../utils'
 
@@ -17,6 +18,7 @@ type NowPlayingProps = {
 export function NowPlaying({ device }: NowPlayingProps) {
 	// Live device state: metadata, playback state, and artwork URL.
 	const { nowPlaying } = useNowPlaying(device)
+	const { isZoneSlave } = useZone(device)
 	const { colors } = useAppSettings()
 	const { canSeek, displayProgressWidth, onProgressBarLayout, seekResponderProps } = useNowPlayingProgressBar(device)
 
@@ -39,7 +41,7 @@ export function NowPlaying({ device }: NowPlayingProps) {
 	const isStandby = source === 'STANDBY'
 	const isInvalidSource = source === 'INVALID_SOURCE'
 	const isAux = source === 'AUX'
-	const hidePlaybackContent = isStandby || isInvalidSource || isAux
+	const hidePlaybackContent = isStandby || isInvalidSource || isAux || isZoneSlave
 
 	const repeatIconName = repeatSetting === 'REPEAT_ONE' ? 'repeat-one' : 'repeat'
 	const nextRepeatKey = repeatSetting === 'REPEAT_OFF' ? 'REPEAT_ALL' : repeatSetting === 'REPEAT_ALL' ? 'REPEAT_ONE' : 'REPEAT_OFF'
@@ -61,17 +63,29 @@ export function NowPlaying({ device }: NowPlayingProps) {
 	const showPlayback = !hidePlaybackContent && hasNowPlaying
 	const primaryColor = colors.text
 	const mutedColor = colors.mutedStrong
-	const statusMessage = isInvalidSource
-		? {
+	let statusMessage: { title: string; subtitle: string } | null = null
+	switch (true) {
+		case isZoneSlave:
+			statusMessage = {
+				title: 'Speaker is grouped',
+				subtitle: 'Use the other speaker to control this speaker.',
+			}
+			break
+		case isInvalidSource:
+			statusMessage = {
 				title: 'No source selected',
 				subtitle: 'Select a source to start listening.',
 			}
-		: isStandby
-			? {
-					title: 'Device is stand by',
-					subtitle: 'Use the power button below to turn it on.',
-				}
-			: null
+			break
+		case isStandby:
+			statusMessage = {
+				title: 'Device is stand by',
+				subtitle: 'Use the power button below to turn it on.',
+			}
+			break
+		default:
+			statusMessage = null
+	}
 
 	return (
 		<>

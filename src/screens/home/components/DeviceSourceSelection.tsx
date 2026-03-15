@@ -44,45 +44,43 @@ export function DeviceSourceSelection({ device, onSelected }: DeviceSourceSelect
 							const label = item.name?.trim() || String(item.sourceAccount ?? item.source ?? '')
 
 							return (
-								<TouchableOpacity
-									key={key}
-									style={[styles.row, { backgroundColor: isCurrent ? colors.surfaceActive : colors.surface }]}
-									onPress={() => {
-										if (isCurrent) return
-										if (!item.source) return
-										void (async () => {
-											await select(item)
-											onSelected?.()
-										})()
-									}}
-									disabled={!item.source || isCurrent}
-									accessibilityRole="button"
-									accessibilityLabel={`Select ${label}`}
-								>
-									<View style={styles.iconWrap}>
-										<MaterialIcons name={getSourceIconName(item.source)} size={18} color={colors.icon} />
-									</View>
-									<View style={styles.rowLabelWrap}>
-										<Text style={[styles.rowTitle, { color: colors.text }]}>{label}</Text>
-										{item.source ? <Text style={[styles.rowMeta, { color: colors.textMuted }]}>{item.source}</Text> : null}
-									</View>
-									<View style={styles.rowRightActions}>
+								<View key={key} style={styles.rowContainer}>
+									<TouchableOpacity
+										style={[styles.row, { backgroundColor: isCurrent ? colors.surfaceActive : colors.surface }]}
+										onPress={() => {
+											if (isCurrent) return
+											if (!item.source) return
+											void (async () => {
+												await select(item)
+												onSelected?.()
+											})()
+										}}
+										disabled={!item.source || isCurrent}
+										accessibilityRole="button"
+										accessibilityLabel={`Select ${label}`}
+									>
+										<View style={styles.iconWrap}>
+											<MaterialIcons name={getSourceIconName(item.source)} size={18} color={colors.icon} />
+										</View>
+										<View style={styles.rowLabelWrap}>
+											<Text style={[styles.rowTitle, { color: colors.text }]}>{label}</Text>
+											{item.source ? <Text style={[styles.rowMeta, { color: colors.textMuted }]}>{item.source}</Text> : null}
+										</View>
 										{isCurrent ? <Text style={[styles.currentText, { color: colors.text }]}>Current</Text> : null}
-										{canOpenApp ? (
-											<TouchableOpacity
-												style={styles.appChevronButton}
-												accessibilityRole="button"
-												accessibilityLabel={`Open ${item.source} app`}
-												onPress={(event) => {
-													event.stopPropagation()
-													void openSourceApp(item.source)
-												}}
-											>
-												<MaterialIcons name="open-in-new" size={16} color={colors.icon} />
-											</TouchableOpacity>
-										) : null}
-									</View>
-								</TouchableOpacity>
+									</TouchableOpacity>
+									{canOpenApp ? (
+										<TouchableOpacity
+											style={styles.appChevronButton}
+											accessibilityRole="button"
+											accessibilityLabel={`Open ${item.source} app`}
+											onPress={() => {
+												void openSourceApp(item.source)
+											}}
+										>
+											<MaterialIcons name="open-in-new" size={16} color={colors.icon} />
+										</TouchableOpacity>
+									) : null}
+								</View>
 							)
 						})}
 					</View>
@@ -115,6 +113,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	row: {
+		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'flex-start',
@@ -144,7 +143,7 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		fontWeight: '700',
 	},
-	rowRightActions: {
+	rowContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 4,

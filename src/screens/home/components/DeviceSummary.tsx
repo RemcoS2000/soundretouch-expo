@@ -6,6 +6,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useInfo } from '../../../hooks/useInfo'
 import { useNowPlaying } from '../../../hooks/useNowPlaying'
+import { useZone } from '../../../hooks/useZone'
 import { useAppSettings } from '../../../state/AppSettingsContext'
 
 type DeviceSummaryProps = {
@@ -21,8 +22,11 @@ export function DeviceSummary({ device, isExpanded, onPress }: DeviceSummaryProp
 	// Keep card label in sync with the active device info payload.
 	const { info } = useInfo(device)
 	const { nowPlaying } = useNowPlaying(device)
+	const { isInZone, isZoneMaster } = useZone(device)
 	const { colors } = useAppSettings()
 	const isPoweredOff = nowPlaying?.source === 'STANDBY'
+	const summaryIconName = isZoneMaster && isInZone ? 'speaker-group' : 'speaker'
+	const collapsedSubtitle = isZoneMaster && isInZone ? 'Tap to open speaker group settings' : 'Tap to open speaker settings'
 
 	// Sends a POWER key press/release directly to the active speaker.
 	const handlePower = useCallback(async () => {
@@ -49,15 +53,13 @@ export function DeviceSummary({ device, isExpanded, onPress }: DeviceSummaryProp
 		>
 			{/* Left: device identity */}
 			<View style={[styles.footerIcon, { backgroundColor: colors.surface }]}>
-				<MaterialIcons name="speaker" size={18} color={colors.icon} />
+				<MaterialIcons name={summaryIconName} size={18} color={colors.icon} />
 			</View>
 			<View style={styles.footerText}>
 				<Text style={[styles.footerTitle, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">
 					{deviceName}
 				</Text>
-				<Text style={[styles.footerSubtitle, { color: colors.textMuted }]}>
-					{isExpanded ? 'Tap to collapse details' : 'Tap to open speaker settings'}
-				</Text>
+				<Text style={[styles.footerSubtitle, { color: colors.textMuted }]}>{isExpanded ? 'Tap to collapse details' : collapsedSubtitle}</Text>
 			</View>
 
 			<View style={styles.rightActions}>
