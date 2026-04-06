@@ -1,43 +1,14 @@
 import type { DeviceInfo, SoundTouchDevice } from '@soundretouch/api/device'
 
-import { useEffect, useState } from 'react'
-import { AppState } from 'react-native'
-
-// Simple in-memory cache keyed by host.
-const infoCache: Record<string, DeviceInfo | undefined> = {}
+import { useSoundTouchDevice } from './useSoundTouchDevice'
 
 export const useInfo = (device: SoundTouchDevice | null) => {
-	const [info, setInfo] = useState<DeviceInfo | null>(null)
-	const visibleInfo = device ? (info ?? infoCache[device.host] ?? null) : null
+	/**
+	 * Exposes the current device info payload.
+	 */
+	const { info } = useSoundTouchDevice(device)
 
-	useEffect(() => {
-		if (!device) return
-
-		let cancelled = false
-
-		const load = async () => {
-			try {
-				const nextInfo = await device.info()
-				infoCache[device.host] = nextInfo
-				if (!cancelled) setInfo(nextInfo)
-			} catch {
-				if (!cancelled) setInfo(null)
-			}
-		}
-
-		void load()
-
-		const appStateSubscription = AppState.addEventListener('change', async (state) => {
-			if (state === 'active') {
-				await load()
-			}
-		})
-
-		return () => {
-			cancelled = true
-			appStateSubscription.remove()
-		}
-	}, [device])
-
-	return { info: visibleInfo }
+	return {
+		info: info as DeviceInfo | null,
+	}
 }
