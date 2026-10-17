@@ -33,6 +33,7 @@ function Navigation() {
 				<Stack.Screen name="speakers" options={{ presentation: 'modal' }} />
 				<Stack.Screen name="settings" options={{ presentation: 'modal' }} />
 				<Stack.Screen name="device-manager" options={{ presentation: 'modal' }} />
+				<Stack.Screen name="groups/[id]" options={{ presentation: 'modal' }} />
 			</Stack>
 		</>
 	)

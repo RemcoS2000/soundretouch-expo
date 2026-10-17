@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BottomSheet } from '../../components/BottomSheet'
 import { useAppSettings } from '../../state/AppSettingsContext'
 import type { SoundTouchDeviceEntry } from '../../state/SoundTouchDevicesContext'
+import { GroupControls } from '../groups/GroupsScreen'
 
 import { PowerControl } from './PowerControl'
 import { PresetPanel } from './PresetPanel'
@@ -147,6 +148,11 @@ export function SpeakerControlSheet({
 				</View>
 				{panel === 'source' && <SourcePanel device={controller.device} />}
 				{panel === 'presets' && <PresetPanel device={controller.device} />}
+				{panel === 'zone' && (
+					<SheetSection title="Group">
+						<GroupControls entry={entry} showSelectedVolume={false} />
+					</SheetSection>
+				)}
 				{panel === 'settings' && (
 					<SheetSection title="Speaker">
 						<PowerControl device={entry.device} />
@@ -166,5 +172,6 @@ export function SpeakerControlSheet({
 const PANELS = [
 	{ id: 'source', label: 'Sources', icon: 'music-note' },
 	{ id: 'presets', label: 'Presets', icon: 'apps' },
+	{ id: 'zone', label: 'Group', icon: 'speaker-group' },
 	{ id: 'settings', label: 'Speaker', icon: 'tune' },
 ] as const
