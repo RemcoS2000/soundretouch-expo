@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	layer: {
-		...StyleSheet.absoluteFillObject,
+		...StyleSheet.absoluteFill,
 		justifyContent: 'center',
 	},
 	container: {

@@ -40,9 +40,9 @@ export function AppBackground({ device }: AppBackgroundProps) {
 
 const styles = StyleSheet.create({
 	backgroundArt: {
-		...StyleSheet.absoluteFillObject,
+		...StyleSheet.absoluteFill,
 	},
 	backgroundOverlay: {
-		...StyleSheet.absoluteFillObject,
+		...StyleSheet.absoluteFill,
 	},
 })

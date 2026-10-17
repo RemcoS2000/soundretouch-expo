@@ -1,7 +1,7 @@
 {
 	"name": "SoundRetouched Dev",
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:20",
-	"postCreateCommand": "npm install",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+	"postCreateCommand": "npm ci",
 	"mounts": ["source=node_modules_${devcontainerId},target=${containerWorkspaceFolder}/node_modules,type=volume"],
 	"customizations": {
 		"vscode": {
@@ -10,22 +10,21 @@
 			},
 			"extensions": [
 				"dbaeumer.vscode-eslint",
-				"ms-vscode.vscode-typescript-next",
 				"ReactNativeTools.vscode-react-native",
 				"ms-azuretools.vscode-docker",
 				"ms-vscode.remote-explorer",
 				"github.vscode-github-actions",
-				"prettier.prettier-vscode",
+				"esbenp.prettier-vscode",
 				"openai.chatgpt"
 			]
 		}
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {
-			"version": "20"
+			"version": "22"
 		}
 	},
-	"runArgs": ["-p=8081:8081", "-p=19000:19000", "-p=19001:19001", "-p=19002:19002", "--env-file", ".env"],
+	"runArgs": ["-p=8081:8081", "-p=19000:19000", "-p=19001:19001", "-p=19002:19002"],
 	"forwardPorts": [8081, 19000, 19001, 19002],
 	"portsAttributes": {
 		"8081": { "label": "Expo Metro" },

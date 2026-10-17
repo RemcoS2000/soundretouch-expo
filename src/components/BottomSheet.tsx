@@ -253,16 +253,16 @@ export function BottomSheet({ footerHeight, screenHeight, renderTopContent, chil
 
 const styles = StyleSheet.create({
 	root: {
-		...StyleSheet.absoluteFillObject,
+		...StyleSheet.absoluteFill,
 		zIndex: 20,
 		justifyContent: 'flex-end',
 	},
 	backdrop: {
-		...StyleSheet.absoluteFillObject,
+		...StyleSheet.absoluteFill,
 		zIndex: 10,
 	},
 	overlay: {
-		...StyleSheet.absoluteFillObject,
+		...StyleSheet.absoluteFill,
 		zIndex: 20,
 	},
 	panel: {
