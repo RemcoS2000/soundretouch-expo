@@ -1,20 +1,36 @@
 import { Platform } from 'react-native'
 
-const DEFAULT_PROXY_BASE = 'http://localhost'
-const DEFAULT_PROXY_PORT = '4100'
-const DEFAULT_PROXY_PATH = '/proxy?url='
-
+/**
+ * Resolves the optional local development HTTP bridge on web; native connects directly.
+ */
 export function getSoundtouchProxyUrl(): string | undefined {
-	if (Platform.OS !== 'web') return undefined
-	if (process.env.EXPO_PUBLIC_USE_DEV_PROXY !== 'true') return undefined
+	if (Platform.OS !== 'web') {
+		return undefined
+	}
 
-	const explicit = process.env.EXPO_PUBLIC_SOUNDTOUCH_PROXY_URL
-	if (explicit) return explicit
+	if (process.env.EXPO_PUBLIC_USE_DEV_PROXY === 'false') {
+		return undefined
+	}
 
-	const base = (process.env.EXPO_PUBLIC_SOUNDTOUCH_PROXY_BASE_URL || process.env.EXPO_PUBLIC_PROXY_BASE_URL || DEFAULT_PROXY_BASE).replace(/\/+$/, '')
-	const port = process.env.EXPO_PUBLIC_SOUNDTOUCH_PROXY_PORT || process.env.EXPO_PUBLIC_PROXY_PORT || DEFAULT_PROXY_PORT
-	const path = process.env.EXPO_PUBLIC_SOUNDTOUCH_PROXY_PATH || DEFAULT_PROXY_PATH
-	const normalizedPath = path.startsWith('/') ? path : `/${path}`
+	const explicit: unknown = process.env.EXPO_PUBLIC_SOUNDTOUCH_PROXY_URL
 
-	return `${base}:${port}${normalizedPath}`
+	if (typeof explicit === 'string' && explicit) {
+		return explicit
+	}
+
+	if (typeof window !== 'undefined' && !__DEV__) {
+		return `${window.location.origin}/proxy?url=`
+	}
+
+	const configuredBase: unknown = process.env.EXPO_PUBLIC_PROXY_BASE_URL
+	const base = (typeof configuredBase === 'string' && configuredBase ? configuredBase : 'http://localhost').replace(/\/+$/, '')
+
+	return `${base}:${process.env.EXPO_PUBLIC_PROXY_PORT || '4100'}/proxy?url=`
+}
+
+/**
+ * Uses the same local development origin for live speaker updates on web.
+ */
+export function getSoundtouchWebSocketProxyUrl(): string | undefined {
+	return getSoundtouchProxyUrl()?.replace(/^http/, 'ws')
 }

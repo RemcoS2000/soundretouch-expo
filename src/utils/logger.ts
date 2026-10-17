@@ -1,10 +1,10 @@
-// utils/logger.ts
+const isDev = typeof __DEV__ !== 'undefined' && __DEV__
 
-const isDev = __DEV__ // true in Expo dev builds
-
-// Helper to format timestamp
+/**
+ * Formats log timestamps consistently as ISO date strings.
+ */
 function timestamp() {
-	return new Date().toISOString() // e.g., "2026-01-10T14:35:22.123Z"
+	return new Date().toISOString()
 }
 
 export const log = {
