@@ -1,0 +1,8 @@
+appId: com.remcos2000.soundretouched
+---
+- launchApp
+- tapOn: 'Open settings'
+- assertVisible: 'Appearance'
+- tapOn: 'Dark mode'
+- tapOn: 'Back'
+- assertVisible: 'Open settings'

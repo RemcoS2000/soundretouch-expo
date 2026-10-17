@@ -1,30 +1,57 @@
 name: CI
-
 on:
     push:
         branches: [main, master]
     pull_request:
         branches: [main, master]
-
+    workflow_dispatch:
 jobs:
-    build:
+    verify:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-
-            - name: Use Node.js
-              uses: actions/setup-node@v4
+            - uses: actions/setup-node@v4
               with:
-                  node-version: 20
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Lint
-              run: npm run lint
-
-            - name: Typecheck
-              run: npm run typecheck
-
-            - name: Run unit tests
-              run: npm run test -- --run
+                  node-version-file: .nvmrc
+                  cache: npm
+            - run: npm ci
+            - run: npm run verify
+            - run: npm run doctor
+            - run: npm run dependencies:check
+            - uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: app-quality-reports
+                  path: |
+                      reports/
+                      coverage/
+    android:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+                  cache: npm
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: '17'
+            - uses: android-actions/setup-android@v3
+            - run: sdkmanager 'platforms;android-37.0' 'build-tools;37.0.0' 'ndk;27.1.12297006'
+            - run: npm ci
+            - run: npx expo prebuild --platform android --no-install
+            - run: npm run android:build
+              env:
+                  NODE_ENV: development
+    ios:
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+                  cache: npm
+            - run: npm ci
+            - run: npx expo prebuild --platform ios
+            - run: xcodebuild -workspace ios/soundretouched.xcworkspace -scheme soundretouched -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build -quiet

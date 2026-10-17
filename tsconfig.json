@@ -2,6 +2,12 @@
 	"extends": "expo/tsconfig.base.json",
 	"compilerOptions": {
 		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"forceConsistentCasingInFileNames": true,
 		"types": ["node", "vitest/globals", "react"]
 	}
 }

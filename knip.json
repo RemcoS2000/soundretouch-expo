@@ -1,0 +1,24 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"entry": [
+		"app/**/*.{ts,tsx}",
+		"scripts/*.{ts,sh}",
+		"plugins/*.cjs",
+		"tests/**/*.{test,spec}.{ts,tsx}",
+		"src/utils/index.ts",
+		"src/design-system/Screen.tsx"
+	],
+	"project": ["**/*.{ts,tsx,js,cjs,mjs}"],
+	"ignoreDependencies": [
+		"@typescript-eslint/eslint-plugin",
+		"@typescript-eslint/parser",
+		"expo-updates",
+		"expo-linear-gradient",
+		"fast-xml-parser",
+		"eslint-plugin-react"
+	],
+	"ignoreExportsUsedInFile": {
+		"type": true,
+		"interface": true
+	}
+}
