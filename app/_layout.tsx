@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { queryClient } from '../src/features/speakers/session'
 import { ActiveSpeakerProvider } from '../src/state/ActiveSpeakerContext'
 import { AppSettingsProvider, useAppSettings } from '../src/state/AppSettingsContext'
+import { ArtworkThemeProvider } from '../src/state/ArtworkThemeProvider'
 import { SoundTouchDevicesProvider } from '../src/state/SoundTouchDevicesContext'
 
 export const unstable_settings = { anchor: 'index' }
@@ -49,7 +50,9 @@ export default function RootLayout() {
 				<QueryClientProvider client={queryClient}>
 					<SoundTouchDevicesProvider>
 						<ActiveSpeakerProvider>
-							<Navigation />
+							<ArtworkThemeProvider>
+								<Navigation />
+							</ArtworkThemeProvider>
 						</ActiveSpeakerProvider>
 					</SoundTouchDevicesProvider>
 				</QueryClientProvider>
