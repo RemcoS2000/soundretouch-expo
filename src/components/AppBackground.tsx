@@ -1,48 +1,51 @@
 import type { SoundTouchDevice } from '@soundretouch/api/device'
 
-import React, { useEffect, useState } from 'react'
-import { Animated, StyleSheet, View } from 'react-native'
+import { Image } from 'expo-image'
+import React, { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 
 import defaultBackgroundImage from '../../assets/images/default-home-background.jpg'
-import { useNowPlaying } from '../hooks/useNowPlaying'
+import { useSpeakerResource } from '../features/speakers/queries'
 import { useAppSettings } from '../state/AppSettingsContext'
-
-const FADE_MS = 320
-const MAX_OPACITY = 0.84
 
 type AppBackgroundProps = {
 	device: SoundTouchDevice | null
 }
 
+/**
+ * Restores the blurred artwork background, with the original colorful image as a fallback.
+ * A themed overlay keeps the player text readable without hiding the artwork colors.
+ */
 export function AppBackground({ device }: AppBackgroundProps) {
-	const { nowPlaying } = useNowPlaying(device)
-	const { colors } = useAppSettings()
-	const [opacity] = useState(() => new Animated.Value(MAX_OPACITY))
-	const artUrl = nowPlaying?.art?.url
-	const imageSource = artUrl ? { uri: artUrl } : defaultBackgroundImage
+	const { data: nowPlaying } = useSpeakerResource(device, 'nowPlaying')
+	const { isDarkMode, reducedMotion } = useAppSettings()
+	const [failedArtwork, setFailedArtwork] = useState<string | null>(null)
 
-	useEffect(() => {
-		opacity.setValue(0)
-		Animated.timing(opacity, {
-			toValue: MAX_OPACITY,
-			duration: FADE_MS,
-			useNativeDriver: true,
-		}).start()
-	}, [artUrl, opacity])
+	const artworkUrl = nowPlaying?.art?.url
+	const imageSource = artworkUrl && artworkUrl !== failedArtwork ? { uri: artworkUrl } : defaultBackgroundImage
 
 	return (
-		<>
-			<Animated.Image source={imageSource} resizeMode="cover" style={[styles.backgroundArt, { opacity }]} blurRadius={36} />
-			<View pointerEvents="none" style={[styles.backgroundOverlay, { backgroundColor: colors.overlayBackground }]} />
-		</>
+		<View pointerEvents="none" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.container}>
+			<Image
+				source={imageSource}
+				contentFit="cover"
+				blurRadius={36}
+				transition={reducedMotion ? 0 : 320}
+				onError={() => setFailedArtwork(artworkUrl ?? null)}
+				style={styles.artwork}
+			/>
+			<View style={[StyleSheet.absoluteFill, { backgroundColor: isDarkMode ? 'rgba(3,6,12,0.76)' : 'rgba(255,255,255,0.88)' }]} />
+		</View>
 	)
 }
 
 const styles = StyleSheet.create({
-	backgroundArt: {
+	container: {
 		...StyleSheet.absoluteFill,
+		overflow: 'hidden',
 	},
-	backgroundOverlay: {
+	artwork: {
 		...StyleSheet.absoluteFill,
+		opacity: 0.84,
 	},
 })

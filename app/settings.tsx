@@ -1,3 +1,1 @@
-import AppSettingsScreen from '../src/screens/settings/AppSettingsScreen'
-
-export default AppSettingsScreen
+export { default } from '../src/screens/settings/AppSettingsScreen'

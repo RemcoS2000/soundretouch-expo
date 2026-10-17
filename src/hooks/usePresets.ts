@@ -1,24 +1,14 @@
-import type { PresetId, Presets, SoundTouchDevice } from '@soundretouch/api/device'
+import type { PresetId, SoundTouchDevice } from '@soundretouch/api/device'
 
-import { useCallback } from 'react'
+import { useSpeakerCommand } from '../features/speakers/commands'
+import { useSpeakerResource } from '../features/speakers/queries'
 
-import { useSoundTouchDevice } from './useSoundTouchDevice'
-
+/**
+ * Exposes cached presets and their selection mutation.
+ */
 export const usePresets = (device: SoundTouchDevice | null) => {
-	/**
-	 * Exposes the device presets and preset selection action.
-	 */
-	const { presets } = useSoundTouchDevice(device)
-	const selectPreset = useCallback(
-		async (presetId: PresetId) => {
-			if (!device) return
-			await device.keyPressAndRelease(`PRESET_${presetId}`)
-		},
-		[device]
-	)
+	const query = useSpeakerResource(device, 'presets')
+	const mutation = useSpeakerCommand(device, (speaker, id: PresetId) => speaker.keyPressAndRelease(`PRESET_${id}`))
 
-	return {
-		presets: presets as Presets,
-		selectPreset,
-	}
+	return { presets: query.data ?? [], selectPreset: mutation.mutateAsync, mutation, query }
 }

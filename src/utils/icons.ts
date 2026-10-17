@@ -13,6 +13,8 @@ export const getSourceIconName = (source?: string) => {
 			return 'language'
 		case 'BLUETOOTH':
 			return 'bluetooth'
+		case undefined:
+			return 'audiotrack'
 		default:
 			return 'audiotrack'
 	}

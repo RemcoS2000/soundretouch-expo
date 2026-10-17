@@ -1,69 +1,49 @@
-import { useRouter } from 'expo-router'
 import React from 'react'
-import { StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native'
+import { Text } from 'react-native'
 
 import { AppBackground } from '../../components/AppBackground'
-import { useAppSettings } from '../../state/AppSettingsContext'
+import { Button, Card, Notice, Screen } from '../../design-system/Screen'
+import { speakerId } from '../../features/speakers/identity'
+import { useActiveSpeaker } from '../../state/ActiveSpeakerContext'
+import { type SettingsMode, useAppSettings } from '../../state/AppSettingsContext'
+import { useSoundTouchDevices } from '../../state/SoundTouchDevicesContext'
 
+/**
+ * Shows persisted appearance choices and local-network connection guidance.
+ */
 export default function AppSettingsScreen() {
-	const router = useRouter()
-	const { isDarkMode, colors, toggleDarkMode } = useAppSettings()
+	const { mode, setMode, colors, settingsError } = useAppSettings()
+	const { devices, error, retryStorage } = useSoundTouchDevices()
+	const { activeId } = useActiveSpeaker()
+	const active = devices.find((entry) => speakerId(entry.device.host, entry.info) === activeId)
 
 	return (
-		<View style={[styles.container, { backgroundColor: colors.background }]}>
-			<AppBackground device={null} />
-			<View style={styles.headerRow}>
-				<Text style={[styles.headerTitle, { color: colors.text }]}>AppSettings</Text>
-				<TouchableOpacity onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Close settings">
-					<Text style={[styles.closeText, { color: colors.text }]}>Close</Text>
-				</TouchableOpacity>
-			</View>
-
-			<View style={[styles.card, { backgroundColor: colors.surfaceElevated }]}>
-				<View>
-					<Text style={[styles.cardTitle, { color: colors.text }]}>Dark mode</Text>
-					<Text style={[styles.cardSubtitle, { color: colors.textMuted }]}>Use a darker color theme across the app.</Text>
-				</View>
-				<Switch value={isDarkMode} onValueChange={toggleDarkMode} />
-			</View>
-		</View>
+		<Screen back title="Settings" background={<AppBackground device={active?.device ?? null} />}>
+			<Card>
+				<Text accessibilityRole="header" style={{ color: colors.text, fontSize: 20, fontWeight: '600' }}>
+					Appearance
+				</Text>
+				{(['system', 'light', 'dark'] as SettingsMode[]).map((option) => (
+					<Button
+						key={option}
+						label={option === 'system' ? 'Follow device appearance' : `${option === 'light' ? 'Light' : 'Dark'} mode`}
+						secondary
+						selected={mode === option}
+						onPress={() => setMode(option)}
+					/>
+				))}
+				<Notice message={settingsError} />
+			</Card>
+			<Card>
+				<Text accessibilityRole="header" style={{ color: colors.text, fontSize: 20, fontWeight: '600' }}>
+					Connection
+				</Text>
+				<Text style={{ color: colors.textMuted, fontSize: 16 }}>{devices.length} saved speaker(s). Control stays on your local network.</Text>
+				<Text style={{ color: colors.textMuted }}>
+					Keep your speakers and this device on the same local network. Internet access is not required for local controls.
+				</Text>
+				<Notice message={error} retry={retryStorage} />
+			</Card>
+		</Screen>
 	)
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-		paddingTop: 60,
-	},
-	headerRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		marginBottom: 16,
-	},
-	headerTitle: {
-		fontSize: 18,
-		fontWeight: '700',
-	},
-	closeText: {
-		fontWeight: '600',
-	},
-	card: {
-		borderRadius: 16,
-		padding: 20,
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		gap: 12,
-		boxShadow: '0px 8px 16px rgba(0,0,0,0.08)',
-	},
-	cardTitle: {
-		fontSize: 16,
-		fontWeight: '700',
-	},
-	cardSubtitle: {
-		marginTop: 4,
-		fontSize: 13,
-	},
-})

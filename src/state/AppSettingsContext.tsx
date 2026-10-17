@@ -1,63 +1,113 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { AccessibilityInfo, useColorScheme } from 'react-native'
 
+import { withArtworkAccent } from '../theme/artwork'
 import { darkColors, lightColors, type ThemeColors } from '../theme/colors'
 
-const STORAGE_KEY = 'soundretouch:theme-mode'
+export type SettingsMode = 'system' | 'light' | 'dark'
 
-type SettingsMode = 'light' | 'dark'
-
-type AppSettingsContextValue = {
+type Value = {
 	mode: SettingsMode
 	isDarkMode: boolean
 	colors: ThemeColors
+	reducedMotion: boolean
+	settingsError: string | null
+	setMode: (mode: SettingsMode) => void
 	toggleDarkMode: () => void
 }
 
-const AppSettingsContext = createContext<AppSettingsContextValue | null>(null)
+const Context = createContext<Value | null>(null)
 
+/**
+ * Restores appearance preferences and follows the device reduced-motion setting.
+ */
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
-	const [mode, setMode] = useState<SettingsMode>('light')
+	const system = useColorScheme()
+	const [mode, updateMode] = useState<SettingsMode>('system')
+	const [reducedMotion, setReducedMotion] = useState(false)
+	const [settingsError, setError] = useState<string | null>(null)
+	const changed = useRef(false)
+	const writes = useRef(Promise.resolve())
 
 	useEffect(() => {
-		let cancelled = false
-		void (async () => {
-			try {
-				const stored = await AsyncStorage.getItem(STORAGE_KEY)
-				if (!cancelled && (stored === 'light' || stored === 'dark')) {
-					setMode(stored)
+		let active = true
+
+		void AsyncStorage.getItem('soundretouch:theme-mode')
+			.then((value) => {
+				if (active && !changed.current && (value === 'light' || value === 'dark' || value === 'system')) {
+					updateMode(value)
 				}
-			} catch {
-				// Ignore storage errors and keep default mode.
-			}
-		})()
+			})
+			.catch(() => {
+				if (active) {
+					setError('Could not read appearance settings.')
+				}
+			})
+		void AccessibilityInfo.isReduceMotionEnabled()
+			.then((value) => {
+				if (active) {
+					setReducedMotion(value)
+				}
+			})
+			.catch(() => undefined)
+
+		const motion = AccessibilityInfo.addEventListener('reduceMotionChanged', setReducedMotion)
 
 		return () => {
-			cancelled = true
+			active = false
+			motion.remove()
 		}
 	}, [])
 
-	const toggleDarkMode = useCallback(() => {
-		setMode((current) => {
-			const next: SettingsMode = current === 'dark' ? 'light' : 'dark'
-			void AsyncStorage.setItem(STORAGE_KEY, next)
-			return next
-		})
+	/**
+	 * Applies the appearance choice immediately and serializes its persistence write.
+	 */
+	const setMode = useCallback((value: SettingsMode) => {
+		changed.current = true
+		updateMode(value)
+		setError(null)
+		writes.current = writes.current
+			.catch(() => undefined)
+			.then(() => AsyncStorage.setItem('soundretouch:theme-mode', value))
+			.catch(() => setError('Could not save appearance settings. Select the option again to retry.'))
 	}, [])
 
+	const isDarkMode = mode === 'dark' || (mode === 'system' && system === 'dark')
+
+	/**
+	 * Switches the effective appearance between explicit light and dark modes.
+	 */
+	const toggleDarkMode = useCallback(() => setMode(isDarkMode ? 'light' : 'dark'), [isDarkMode, setMode])
+
 	const value = useMemo(
-		() => ({ mode, isDarkMode: mode === 'dark', colors: mode === 'dark' ? darkColors : lightColors, toggleDarkMode }),
-		[mode, toggleDarkMode]
+		() => ({ mode, isDarkMode, colors: isDarkMode ? darkColors : lightColors, reducedMotion, settingsError, setMode, toggleDarkMode }),
+		[mode, isDarkMode, reducedMotion, settingsError, setMode, toggleDarkMode]
 	)
 
-	return <AppSettingsContext.Provider value={value}>{children}</AppSettingsContext.Provider>
+	return <Context.Provider value={value}>{children}</Context.Provider>
 }
 
+/**
+ * Returns appearance tokens, preferences and their update actions.
+ */
 export function useAppSettings() {
-	const context = useContext(AppSettingsContext)
-	if (!context) {
-		throw new Error('useAppSettings must be used within AppSettingsProvider')
+	const value = useContext(Context)
+
+	if (!value) {
+		throw new Error('AppSettingsProvider missing')
 	}
-	return context
+
+	return value
+}
+
+/**
+ * Shares artwork accents while retaining the parent provider's persisted preferences.
+ */
+export function AppAccentTheme({ source, children }: { source: number | null; children: React.ReactNode }) {
+	const settings = useAppSettings()
+	const value = useMemo(() => ({ ...settings, colors: withArtworkAccent(settings.colors, source, settings.isDarkMode) }), [settings, source])
+
+	return <Context.Provider value={value}>{children}</Context.Provider>
 }

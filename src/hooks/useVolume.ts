@@ -1,38 +1,33 @@
 import type { SoundTouchDevice } from '@soundretouch/api/device'
+import { useMutation } from '@tanstack/react-query'
 
-import { useCallback, useState } from 'react'
+import { setSpeakerVolume } from '../features/speakers/commands'
+import { useSpeakerResource } from '../features/speakers/queries'
 
-import { useSoundTouchDevice } from './useSoundTouchDevice'
-
-const clampVolume = (value: number) => Math.max(0, Math.min(100, Math.round(value)))
-
+/**
+ * Exposes live volume and clamped updates through the coalescing command queue.
+ */
 export const useVolume = (device: SoundTouchDevice | null) => {
-	/**
-	 * Exposes live volume state and the volume update action.
-	 */
-	const { volume: volumeData, isVolumeLoading } = useSoundTouchDevice(device)
-	const [isUpdating, setIsUpdating] = useState(false)
-	const nextVolume = volumeData?.actualvolume ?? volumeData?.targetvolume
-	const volume = typeof nextVolume === 'number' ? clampVolume(nextVolume) : 0
-	const muteEnabled = volumeData?.muteenabled ?? false
-	const setVolume = useCallback(
-		async (value: number) => {
-			if (!device) return
-			setIsUpdating(true)
-			try {
-				await device.setVolume(clampVolume(value), false)
-			} finally {
-				setIsUpdating(false)
+	const query = useSpeakerResource(device, 'volume')
+
+	const mutation = useMutation({
+		mutationFn: (value: number) => {
+			if (!device) {
+				throw new Error('No speaker selected')
 			}
+
+			return setSpeakerVolume(device, Math.max(0, Math.min(100, Math.round(value))))
 		},
-		[device]
-	)
+	})
 
 	return {
-		volume,
-		muteEnabled,
-		isLoading: isVolumeLoading,
-		isUpdating,
-		setVolume,
+		volume: query.data?.actualvolume ?? query.data?.targetvolume ?? 0,
+		muteEnabled: query.data?.muteenabled ?? false,
+		isLoading: query.isLoading,
+		isUpdating: mutation.isPending,
+		setVolume: mutation.mutateAsync,
+		updateVolume: mutation.mutate,
+		error: mutation.error ?? query.error,
+		query,
 	}
 }

@@ -1,4 +1,8 @@
 export type ThemeColors = {
+	accent: string
+	onAccent: string
+	accentSurface: string
+	onAccentSurface: string
 	background: string
 	text: string
 	textMuted: string
@@ -17,6 +21,10 @@ export type ThemeColors = {
 }
 
 export const lightColors: ThemeColors = {
+	accent: '#111111',
+	onAccent: '#ffffff',
+	accentSurface: '#e5e7eb',
+	onAccentSurface: '#111111',
 	background: '#f3f4f6',
 	text: '#111',
 	textMuted: '#666',
@@ -35,6 +43,10 @@ export const lightColors: ThemeColors = {
 }
 
 export const darkColors: ThemeColors = {
+	accent: '#ffffff',
+	onAccent: '#111111',
+	accentSurface: '#2f3744',
+	onAccentSurface: '#ffffff',
 	background: '#0f1115',
 	text: '#fff',
 	textMuted: '#b8c0cc',
