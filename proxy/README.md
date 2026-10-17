@@ -1,75 +1,22 @@
-# Development Proxy
+# Local browser companion
 
-This project includes an optional, development-only proxy for Expo Web. When enabled, the proxy routes network requests through a local server to:
+`npm run web:export` produces the web app; `npm run proxy` serves it at `http://localhost:4100` together with the HTTP and WebSocket bridge. The same origin avoids browser CORS and mixed-content problems. This is a local companion, not a public hosted service.
 
-- Avoid CORS restrictions in the browser
-- Bypass per-origin connection limits
+Native apps communicate directly with speakers. Browser discovery remains unavailable; add speakers by IP address or hostname.
 
-The proxy is only used in development and is never enabled on native platforms.
+The bridge binds to `127.0.0.1`. `/proxy?url=<encoded-target>` accepts speaker HTTP on port 8090 and WebSocket on port 8080, forwards the `gabbo` subprotocol, pins validated local DNS addresses, rejects redirects and untrusted origins, and cleans up on disconnect. `/health` reports bridge availability. Do not expose this service publicly.
 
-## Features
+For development with Metro's web server, use `npm run web` alongside `npm run proxy`. Existing `.env.local` settings remain supported:
 
-### 1. Generic Request Proxy
-
-`GET /proxy?url=<encoded target URL>`
-
-Forwards any HTTP request to the specified target URL, streaming the response directly back to the client. Useful for accessing local devices or APIs blocked by browser CORS rules.
-
-Example:
-
-```
-http://localhost:4100/proxy?url=http%3A%2F%2F192.168.1.37%3A8090%2Finfo
-```
-
-## Configuration
-
-The proxy is controlled entirely through environment variables.
-
-### Client-side (Expo Web)
-
-These variables define whether the proxy is enabled and where requests are routed:
-
-- `EXPO_PUBLIC_USE_DEV_PROXY` enables or disables the dev proxy.
-- `EXPO_PUBLIC_PROXY_BASE_URL` sets the base URL for the proxy.
-- `EXPO_PUBLIC_PROXY_PORT` sets the port the proxy server listens on.
-
-### Server-side (Proxy)
-
-These variables configure the proxy server itself:
-
-- `DEV_PROXY_PORT` sets the port for the main proxy server.
-- `DEV_PROXY_DISCOVERY_TIMEOUT_MS` sets the timeout (in milliseconds) for proxied requests.
-
-Example `.env`:
-
-```
-# Enable dev proxy
+```dotenv
 EXPO_PUBLIC_USE_DEV_PROXY=true
 EXPO_PUBLIC_PROXY_BASE_URL=http://localhost
 EXPO_PUBLIC_PROXY_PORT=4100
-
-# Development proxy server settings
 DEV_PROXY_PORT=4100
-DEV_PROXY_DISCOVERY_TIMEOUT_MS=15000
+DEV_PROXY_DISCOVERY_TIMEOUT_MS=8000
+DEV_PROXY_ALLOWED_ORIGINS=http://localhost:8081,http://127.0.0.1:8081
 ```
 
-## Running the Proxy
+Production web exports use their own origin for the bridge unless `EXPO_PUBLIC_SOUNDTOUCH_PROXY_URL` explicitly overrides it. Native platforms ignore bridge settings. `EXPO_PUBLIC_*` values are visible to users and must not contain secrets.
 
-Start the development proxy server with:
-
-```
-npm run proxy
-```
-
-## Platform Behavior
-
-Expo Web (development):
-Requests are automatically routed through the proxy when enabled via environment variables.
-
-Expo Go / Native (iOS and Android):
-The proxy is not used. All requests are made directly.
-
-## Notes
-
-- This proxy is intended only for local development.
-- All proxy behavior is opt-in via environment variables.
+Integration tests bind loopback ports 8080 and 8090; keep those ports free when running tests.
